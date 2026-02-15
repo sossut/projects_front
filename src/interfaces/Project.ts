@@ -8,6 +8,7 @@ import type { Contractor } from './Contractor';
 import type { Country } from './Country';
 import type { Developer } from './Developer';
 import type { ProjectMedia } from './ProjectMedia';
+import type { ProjectWebsite } from './ProjectWebsite';
 import type { SourceLink } from './SourceLink';
 
 export interface Project {
@@ -56,7 +57,7 @@ export interface Project {
       longitude: number;
     };
   };
-  projectWebsites?: string[];
+  projectWebsites?: ProjectWebsite[] | string[];
   developers?: Developer[];
   architects?: Architect[];
   contractors?: Contractor[];

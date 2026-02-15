@@ -37,22 +37,6 @@ const ProjectTable = () => {
   const [isModalOpen, setIsModalOpen] = React.useState<null | 'image' | 'info'>(
     null
   );
-  const [carouselIndex, setCarouselIndex] = React.useState<{
-    [key: number]: number;
-  }>({});
-  const handlePrev = (projectId: number, mediasLength: number) => {
-    setCarouselIndex((prev) => ({
-      ...prev,
-      [projectId]: prev[projectId] > 0 ? prev[projectId] - 1 : mediasLength - 1
-    }));
-  };
-
-  const handleNext = (projectId: number, mediasLength: number) => {
-    setCarouselIndex((prev) => ({
-      ...prev,
-      [projectId]: prev[projectId] < mediasLength - 1 ? prev[projectId] + 1 : 0
-    }));
-  };
 
   React.useEffect(() => {
     getProjectsSimple();
