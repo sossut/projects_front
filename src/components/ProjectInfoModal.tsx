@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { useProjects } from '../hooks/ApiHooks';
 import type { Project } from '../interfaces/Project';
-import type { BuildingUse } from '../interfaces/BuildingUse';
-import type { ProjectWebsite } from '../interfaces/ProjectWebsite';
+
 import styled from 'styled-components';
-import type { Consultant } from '../interfaces/Consultant';
-import type { Contractor } from '../interfaces/Contractor';
-import blackBalls from '../assets/Options_black_balls.png';
-import whiteBalls from '../assets/Options_white_balls.png';
+
+import ProjectDetails from './ProjectDetails';
+import ProjectEdit from './ProjectEdit';
+import ProjectModalOptionsMenu from './ProjectModalOptionsMenu';
+import ProjectViewJson from './ProjectViewJson';
 
 interface ProjectInfoModalProps {
   id: number;
@@ -44,23 +44,13 @@ const ModalContent = styled.div`
   max-height: 80vh;
 `;
 
-const LabelTD = styled.td`
-  font-weight: bold;
-  padding: 4px 8px;
-  vertical-align: top;
-  width: 150px;
-  white-space: nowrap;
-`;
-
-const ValueTD = styled.td`
-  padding: 4px 8px;
-  vertical-align: top;
-  word-break: break-all;
-`;
-
 const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ id, onClose }) => {
   const { getProject } = useProjects();
   const [project, setProject] = React.useState<Project | null>(null);
+  const [view, setView] = React.useState<'details' | 'edit' | 'json'>(
+    'details'
+  );
+  const [showOptions, setShowOptions] = React.useState(false);
   useEffect(() => {
     (async () => {
       const data = await getProject(id);
@@ -95,13 +85,25 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ id, onClose }) => {
             >
               {project?.name}
             </h2>
-            <button>
-              <img
-                src={whiteBalls}
-                alt="Options"
-                style={{ width: 20, height: 20 }}
-              />
+            <button
+              onClick={() => setShowOptions((prev) => !prev)}
+              style={{
+                padding: 1,
+
+                background: 'black',
+                color: '#fff'
+              }}
+            >
+              Options
             </button>
+            {showOptions && (
+              <ProjectModalOptionsMenu
+                onEdit={() => setView('edit')}
+                onDetails={() => setView('details')}
+                onViewJson={() => setView('json')}
+                onClose={() => setShowOptions(false)}
+              />
+            )}
             <button
               onClick={onClose}
               style={{
@@ -119,277 +121,20 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ id, onClose }) => {
               }}
               aria-label="Close"
             >
-              &times;
+              <span
+                style={{
+                  transform: 'translate(0, -3px)'
+                }}
+              >
+                &times;
+              </span>
             </button>
           </div>
-          {(project?.projectMedias?.length ?? 0) > 0 && (
-            <tr>
-              <td style={{ padding: '4px 8px' }}>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  {project?.projectMedias?.map((media) => (
-                    <img
-                      key={media.id}
-                      src={media.url}
-                      alt={media.title || 'Project'}
-                      style={{ height: 280, borderRadius: 4 }}
-                    />
-                  ))}
-                </div>
-              </td>
-            </tr>
+          {view === 'details' && <ProjectDetails project={project} />}
+          {view === 'edit' && project && (
+            <ProjectEdit project={project} onClose={onClose} />
           )}
-          <table
-            style={{ width: '100%', color: '#fff', borderCollapse: 'collapse' }}
-          >
-            <tbody>
-              <tr>
-                <LabelTD>City</LabelTD>
-                <ValueTD>{project?.address?.city?.name}</ValueTD>
-              </tr>
-              <tr>
-                <LabelTD>Country</LabelTD>
-                <ValueTD>{project?.address?.country?.name}</ValueTD>
-              </tr>
-              <tr>
-                <LabelTD>Status</LabelTD>
-                <ValueTD>{project?.status}</ValueTD>
-              </tr>
-              <tr>
-                <LabelTD>Building Type</LabelTD>
-                <ValueTD>{project?.buildingType}</ValueTD>
-              </tr>
-              <tr>
-                <LabelTD>Building Uses</LabelTD>
-                <ValueTD>
-                  {(project?.buildingUses as BuildingUse[])
-                    ?.map((u) => u.buildingUse)
-                    .join(', ')}
-                </ValueTD>
-              </tr>
-              <tr>
-                <LabelTD>Height</LabelTD>
-                <ValueTD>
-                  {project?.buildingHeightMeters} m /{' '}
-                  {project?.buildingHeightFloors} floors
-                </ValueTD>
-              </tr>
-              <tr>
-                <LabelTD>Expected Completion</LabelTD>
-                <ValueTD>{project?.expectedDateText}</ValueTD>
-              </tr>
-
-              {(project?.projectWebsites?.length ?? 0) > 0 && (
-                <tr>
-                  <LabelTD>Websites</LabelTD>
-                  <ValueTD>
-                    <ul
-                      style={{
-                        margin: 0,
-                        padding: 0,
-                        listStyleType: 'none'
-                      }}
-                    >
-                      {(project?.projectWebsites as ProjectWebsite[])?.map(
-                        (site) => (
-                          <li key={site.id as number | string}>
-                            <a
-                              href={site.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ color: '#4af' }}
-                            >
-                              {site.url}
-                            </a>
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </ValueTD>
-                </tr>
-              )}
-              {(project?.developers?.length ?? 0) > 0 && (
-                <tr>
-                  <LabelTD>Developers</LabelTD>
-                  <ValueTD>
-                    <ul
-                      style={{
-                        margin: 0,
-                        padding: 0,
-                        listStyleType: 'none'
-                      }}
-                    >
-                      {project?.developers?.map((dev) => (
-                        <li key={dev.id || dev.name}>{dev.name}</li>
-                      ))}
-                    </ul>
-                  </ValueTD>
-                </tr>
-              )}
-              {(project?.architects?.length ?? 0) > 0 && (
-                <tr>
-                  <LabelTD>Architects</LabelTD>
-                  <ValueTD>
-                    <ul
-                      style={{
-                        margin: 0,
-                        padding: 0,
-                        listStyleType: 'none'
-                      }}
-                    >
-                      {project?.architects?.map((arch) => (
-                        <li key={arch.id || arch.name}>{arch.name}</li>
-                      ))}
-                    </ul>
-                  </ValueTD>
-                </tr>
-              )}
-              {(project?.consultants?.length ?? 0) > 0 && (
-                <tr>
-                  <LabelTD>Consultants</LabelTD>
-                  <ValueTD>
-                    <ul
-                      style={{
-                        margin: 0,
-                        padding: 0,
-                        listStyleType: 'none'
-                      }}
-                    >
-                      {(project?.consultants as Consultant[])
-                        .filter((c) => c.name)
-                        .map((consultant) => (
-                          <li key={consultant.id || consultant.name}>
-                            <div>
-                              <strong>{consultant.name}</strong>
-                            </div>
-                            {consultant.email && (
-                              <div>
-                                Email:{' '}
-                                <a
-                                  href={`mailto:${consultant.email}`}
-                                  style={{ color: '#4af' }}
-                                >
-                                  {consultant.email}
-                                </a>
-                              </div>
-                            )}
-                            {consultant.phone && (
-                              <div>
-                                Phone:{' '}
-                                <a
-                                  href={`tel:${consultant.phone}`}
-                                  style={{ color: '#4af' }}
-                                >
-                                  {consultant.phone}
-                                </a>
-                              </div>
-                            )}
-                            {consultant.website && (
-                              <div>
-                                Website:{' '}
-                                <a
-                                  href={consultant.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{ color: '#4af' }}
-                                >
-                                  {consultant.website}
-                                </a>
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                    </ul>
-                  </ValueTD>
-                </tr>
-              )}
-              {(project?.contractors?.length ?? 0) > 0 && (
-                <tr>
-                  <LabelTD>Contractors</LabelTD>
-                  <ValueTD>
-                    <ul
-                      style={{
-                        margin: 0,
-                        padding: 0,
-                        listStyleType: 'none'
-                      }}
-                    >
-                      {(project?.contractors as Contractor[])
-                        .filter((c) => c.name)
-                        .map((contractor) => (
-                          <li key={contractor.id || contractor.name}>
-                            <div>
-                              <strong>{contractor.name}</strong>
-                            </div>
-                            {contractor.email && (
-                              <div>
-                                Email:{' '}
-                                <a
-                                  href={`mailto:${contractor.email}`}
-                                  style={{ color: '#4af' }}
-                                >
-                                  {contractor.email}
-                                </a>
-                              </div>
-                            )}
-                            {contractor.phone && (
-                              <div>
-                                Phone:{' '}
-                                <a
-                                  href={`tel:${contractor.phone}`}
-                                  style={{ color: '#4af' }}
-                                >
-                                  {contractor.phone}
-                                </a>
-                              </div>
-                            )}
-                            {contractor.website && (
-                              <div>
-                                Website:{' '}
-                                <a
-                                  href={contractor.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{ color: '#4af' }}
-                                >
-                                  {contractor.website}
-                                </a>
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                    </ul>
-                  </ValueTD>
-                </tr>
-              )}
-              {(project?.sources?.length ?? 0) > 0 && (
-                <tr>
-                  <LabelTD>Sources</LabelTD>
-                  <ValueTD>
-                    <ul
-                      style={{
-                        margin: 0,
-                        padding: 0,
-                        listStyleType: 'none'
-                      }}
-                    >
-                      {project?.sources?.map((link) => (
-                        <li key={link.id}>
-                          <a
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ color: '#4af' }}
-                          >
-                            {link.publisher}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </ValueTD>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          {view === 'json' && <ProjectViewJson id={project?.id || 0} />}
         </ModalContent>
       </Modal>
     </ModalBackground>

@@ -79,14 +79,90 @@ const useProjects = () => {
     }
   };
 
+  const getProjectFormatted = async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`getProjectFormattedById: ${id}`);
+      const data = await fetchJson(`${baseUrl}/projects/formatted/${id}`);
+      return data;
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProject = async (id: number, updatedData: Partial<Project>) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`updateProject: ${id}`, updatedData);
+      const response = await fetchJson(`${baseUrl}/projects/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+      return response;
+      // Optionally update local state here if needed
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     projects,
     loading,
     error,
     getProjects,
     getProjectsSimple,
-    getProject
+    getProject,
+    getProjectFormatted,
+    updateProject
   };
 };
 
-export { useProjects };
+const useBuildingUses = () => {
+  const [buildingUses, setBuildingUses] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const getBuildingUses = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log('getBuildingUses');
+      const data = await fetchJson(`${baseUrl}/building-uses`);
+      setBuildingUses(data);
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    buildingUses,
+    loading,
+    error,
+    getBuildingUses
+  };
+};
+
+export { useProjects, useBuildingUses };
