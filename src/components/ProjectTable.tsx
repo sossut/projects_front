@@ -2,10 +2,22 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import { useProjects } from '../hooks/ApiHooks';
+import {
+  useProjects,
+  useCities,
+  useCountries,
+  useMetroAreas,
+  useBuildingUses,
+  useBuildingTypes
+} from '../hooks/ApiHooks';
 import type { BuildingUse } from '../interfaces/BuildingUse';
 import ProjectInfoModal from './ProjectInfoModal';
 import ProjectImageModal from './ProjectImageModal';
+import type { City } from '../interfaces/City';
+import DropdownCheckbox from './DropdownCheckbox';
+import type { MetroArea } from '../interfaces/MetroArea';
+import type { Country } from '../interfaces/Country';
+import type { BuildingType } from '../interfaces/BuildinType';
 
 const Table = styled.table`
   width: 100%;
@@ -29,8 +41,29 @@ const TD = styled.td`
   text-align: left;
 `;
 
+const FilterDiv = styled.div`
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+`;
+
 const ProjectTable = () => {
-  const { projects, getProjectsSimple } = useProjects();
+  const {
+    projects,
+    getProjectsSimple,
+    statuses,
+    getStatuses,
+    projectCount,
+    getProjectCount
+  } = useProjects();
+  const { cities, getCities } = useCities();
+  const { countries, getCountries } = useCountries();
+  const { metroAreas, getMetroAreas } = useMetroAreas();
+  const { buildingUses, getBuildingUses } = useBuildingUses();
+  const { buildingTypes, getBuildingTypes } = useBuildingTypes();
+
   const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = React.useState<
     number | null
@@ -39,31 +72,66 @@ const ProjectTable = () => {
     null
   );
   const [filter, setFilter] = React.useState({
-    city: '',
-    status: '',
-    continent: '',
-    metroArea: '',
-    country: '',
-    buildingType: '',
-    buildingUse: '',
+    city: [] as string[],
+    status: [] as string[],
+    metroArea: [] as string[],
+    country: [] as string[],
+    buildingType: [] as string[],
+    buildingUse: [] as string[],
     minBudget: '',
     maxBudget: '',
-    minHeight: '',
-    maxHeight: ''
+    minHeightMeters: '',
+    maxHeightMeters: ''
   });
 
   const [sortKey, setSortKey] = useState('id');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(100);
+  const [pageSize, setPageSize] = useState(2);
+  const [pageCount, setPageCount] = useState(1);
+
+  const calculatePageCount = (totalCount: number, pageSize: number) => {
+    return Math.ceil(totalCount / pageSize);
+  };
+
+  const serializeFilters = () => {
+    const params = new URLSearchParams();
+    Object.entries(filter).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => {
+          if (v) params.append(key, v);
+        });
+      } else {
+        if (value) params.append(key, value);
+      }
+    });
+    return params.toString();
+  };
 
   React.useEffect(() => {
-    getProjectsSimple();
+    getCities();
+    getCountries();
+    getMetroAreas();
+    getStatuses();
+    getBuildingUses();
+    getBuildingTypes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => {
+    getProjectsSimple(serializeFilters(), sortKey, order, pageSize, page);
+    getProjectCount(serializeFilters());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   React.useEffect(() => {
+    setPageCount(calculatePageCount(projectCount, pageSize));
+  }, [projectCount, pageSize]);
+  React.useEffect(() => {
     console.log(projects);
   }, [projects]);
+  if (!projects || projects.length === 0) {
+    return <p>No data available</p>;
+  }
   return (
     <div>
       <div>
@@ -76,64 +144,86 @@ const ProjectTable = () => {
           <option value="buildingHeightFloors">Height (floors)</option>
           <option value="lastVerifiedDate">Last verified date</option>
         </select>
+        <label>Order:</label>
+        <select onChange={(e) => setOrder(e.target.value as 'asc' | 'desc')}>
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
       </div>
-      <div>
+      <div></div>
+      <FilterDiv>
         <label>Filter by:</label>
-        <input
-          type="text"
-          placeholder="City"
-          value={filter.city}
+        {/* <select
+          value={filter.city[0] || ''}
           onChange={(e) =>
-            setFilter((prev) => ({ ...prev, city: e.target.value }))
+            setFilter((prev) => ({
+              ...prev,
+              city: e.target.value ? [e.target.value] : []
+            }))
           }
+        >
+          <option value="">All Cities</option>
+          {((cities as unknown as City[]) ?? []).map((city) => (
+            <option key={city.id} value={city.name}>
+              {city.name}
+            </option>
+          ))}
+        </select> */}
+        <DropdownCheckbox
+          options={((cities as unknown as City[]) ?? []).map((c) => c.name)}
+          selected={filter.city}
+          onChange={(cityArr) =>
+            setFilter((prev) => ({ ...prev, city: cityArr }))
+          }
+          label="City"
         />
-        <input
-          type="text"
-          placeholder="Status"
-          value={filter.status}
-          onChange={(e) =>
-            setFilter((prev) => ({ ...prev, status: e.target.value }))
+        <DropdownCheckbox
+          options={statuses}
+          selected={filter.status}
+          onChange={(statusArr) =>
+            setFilter((prev) => ({ ...prev, status: statusArr }))
           }
+          label="Status"
         />
-        <input
-          type="text"
-          placeholder="Continent"
-          value={filter.continent}
-          onChange={(e) =>
-            setFilter((prev) => ({ ...prev, continent: e.target.value }))
+        <DropdownCheckbox
+          options={((metroAreas as unknown as MetroArea[]) ?? []).map(
+            (m) => m.name
+          )}
+          selected={filter.metroArea}
+          onChange={(metroAreaArr) =>
+            setFilter((prev) => ({ ...prev, metroArea: metroAreaArr }))
           }
+          label="Metro Area"
         />
-        <input
-          type="text"
-          placeholder="Metro Area"
-          value={filter.metroArea}
-          onChange={(e) =>
-            setFilter((prev) => ({ ...prev, metroArea: e.target.value }))
+        <DropdownCheckbox
+          options={((countries as unknown as Country[]) ?? []).map(
+            (c) => c.name
+          )}
+          selected={filter.country}
+          onChange={(countryArr) =>
+            setFilter((prev) => ({ ...prev, country: countryArr }))
           }
+          label="Country"
         />
-        <input
-          type="text"
-          placeholder="Country"
-          value={filter.country}
-          onChange={(e) =>
-            setFilter((prev) => ({ ...prev, country: e.target.value }))
+        <DropdownCheckbox
+          options={((buildingTypes as unknown as BuildingType[]) ?? []).map(
+            (b) => b.buildingType
+          )}
+          selected={filter.buildingType}
+          onChange={(buildingTypeArr) =>
+            setFilter((prev) => ({ ...prev, buildingType: buildingTypeArr }))
           }
+          label="Building Type"
         />
-        <input
-          type="text"
-          placeholder="Building Type"
-          value={filter.buildingType}
-          onChange={(e) =>
-            setFilter((prev) => ({ ...prev, buildingType: e.target.value }))
+        <DropdownCheckbox
+          options={((buildingUses as unknown as BuildingUse[]) ?? []).map(
+            (b) => b.buildingUse
+          )}
+          selected={filter.buildingUse}
+          onChange={(buildingUseArr) =>
+            setFilter((prev) => ({ ...prev, buildingUse: buildingUseArr }))
           }
-        />
-        <input
-          type="text"
-          placeholder="Building Use"
-          value={filter.buildingUse}
-          onChange={(e) =>
-            setFilter((prev) => ({ ...prev, buildingUse: e.target.value }))
-          }
+          label="Building Use"
         />
         <input
           type="number"
@@ -154,19 +244,112 @@ const ProjectTable = () => {
         <input
           type="number"
           placeholder="Min Height (m)"
-          value={filter.minHeight}
+          value={filter.minHeightMeters}
           onChange={(e) =>
-            setFilter((prev) => ({ ...prev, minHeight: e.target.value }))
+            setFilter((prev) => ({ ...prev, minHeightMeters: e.target.value }))
           }
         />
         <input
           type="number"
           placeholder="Max Height (m)"
-          value={filter.maxHeight}
+          value={filter.maxHeightMeters}
           onChange={(e) =>
-            setFilter((prev) => ({ ...prev, maxHeight: e.target.value }))
+            setFilter((prev) => ({ ...prev, maxHeightMeters: e.target.value }))
           }
         />
+        <button
+          onClick={() =>
+            getProjectsSimple(
+              serializeFilters(),
+              sortKey,
+              order,
+              pageSize,
+              page
+            )
+          }
+          style={{ marginRight: 8 }}
+        >
+          Set Filters
+        </button>
+        <button
+          onClick={() => {
+            setFilter({
+              city: [],
+              status: [],
+              metroArea: [],
+              country: [],
+              buildingType: [],
+              buildingUse: [],
+              minBudget: '',
+              maxBudget: '',
+              minHeightMeters: '',
+              maxHeightMeters: ''
+            });
+            // Optionally fetch all projects after clearing
+            getProjectsSimple('', sortKey, order, pageSize, page);
+          }}
+        >
+          Clear Filters
+        </button>
+      </FilterDiv>
+      <div>
+        <button
+          onClick={() => {
+            setPage((prev) => Math.max(prev - 1, 1));
+            getProjectsSimple(
+              serializeFilters(),
+              sortKey,
+              order,
+              pageSize,
+              Math.max(page - 1, 1)
+            );
+          }}
+        >
+          Previous
+        </button>
+        <span>
+          Page {page} of {pageCount}
+        </span>
+        <button
+          onClick={() => {
+            setPage((prev) => prev + 1);
+            getProjectsSimple(
+              serializeFilters(),
+              sortKey,
+              order,
+              pageSize,
+              page + 1
+            );
+          }}
+        >
+          Next
+        </button>
+        <label>Page Size:</label>
+        <select
+          value={pageSize}
+          onChange={(e) => setPageSize(Number(e.target.value))}
+        >
+          <option value={2}>2</option>
+          <option value={10}>10</option>
+          <option value={25}>25</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+          <option value={200}>200</option>
+        </select>
+        <button
+          onClick={() => {
+            setPage(1);
+            getProjectsSimple(
+              serializeFilters(),
+              sortKey,
+              order,
+              Number(pageSize),
+              1
+            );
+          }}
+        >
+          Set Page Size
+        </button>
       </div>
       <Table>
         <THead>
