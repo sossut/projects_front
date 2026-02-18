@@ -15,13 +15,14 @@ const ProjectViewJson: React.FC<ProjectViewJsonProps> = ({ id }) => {
 
   const instructions = `\n\n---\nInstructions:\n1. Enrich and find more data for this json 
   \n2. Review all fields for accuracy.\n3. Dont make up new fields.\n
-  4. Here is the json schema with enum fields:\n
+  4. Media  urls should be direct links to media files, not source pages, endiing with .jpg .webp, .png \n
+  5. Here is the json schema with enum fields:\n
   
     {
       "id": "",
       "name": "",
       "buildingType": "Skyscraper | High-rise | Major civic or commercial building | Industrial building",
-      "buildingUse": [
+      "buildingUses": [
         {buildingUse: "office | residential | mixed-use | hotel | hospital | education | retail | cultural | industrial | logistics | data_center | other"}
         
       ],

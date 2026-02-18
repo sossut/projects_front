@@ -77,6 +77,7 @@ const useProjects = () => {
     try {
       console.log('getProjectCount');
       const response = await fetchJson(`${baseUrl}/projects/count?${filters}`);
+      console.log(`${baseUrl}/projects/count?${filters}`);
       setProjectCount(response.count);
     } catch (e) {
       if (e instanceof Error) {

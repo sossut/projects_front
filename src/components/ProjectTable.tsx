@@ -71,7 +71,7 @@ const ProjectTable = () => {
   const [isModalOpen, setIsModalOpen] = React.useState<null | 'image' | 'info'>(
     null
   );
-  const [filter, setFilter] = React.useState({
+  const [filters, setFilters] = React.useState({
     city: [] as string[],
     status: [] as string[],
     metroArea: [] as string[],
@@ -83,12 +83,14 @@ const ProjectTable = () => {
     minHeightMeters: '',
     maxHeightMeters: ''
   });
+  const [filterDraft, setFilterDraft] = React.useState(filters);
 
   const [sortKey, setSortKey] = useState('id');
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(2);
+  const [pageSize, setPageSize] = useState(100);
   const [pageCount, setPageCount] = useState(1);
+  const [restored, setRestored] = useState(false);
 
   const calculatePageCount = (totalCount: number, pageSize: number) => {
     return Math.ceil(totalCount / pageSize);
@@ -96,7 +98,7 @@ const ProjectTable = () => {
 
   const serializeFilters = () => {
     const params = new URLSearchParams();
-    Object.entries(filter).forEach(([key, value]) => {
+    Object.entries(filters).forEach(([key, value]) => {
       if (Array.isArray(value)) {
         value.forEach((v) => {
           if (v) params.append(key, v);
@@ -119,16 +121,44 @@ const ProjectTable = () => {
   }, []);
 
   React.useEffect(() => {
+    if (!restored) return;
     getProjectsSimple(serializeFilters(), sortKey, order, pageSize, page);
     getProjectCount(serializeFilters());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [filters, sortKey, order, pageSize, page, restored]);
+
   React.useEffect(() => {
     setPageCount(calculatePageCount(projectCount, pageSize));
   }, [projectCount, pageSize]);
+
   React.useEffect(() => {
     console.log(projects);
   }, [projects]);
+
+  // Restore state from localStorage on mount, then trigger fetch after all state is set
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem('projectTableState');
+    if (saved) {
+      const { filters, sortKey, order, pageSize } = JSON.parse(saved);
+      setFilters(filters);
+      setFilterDraft(filters);
+      setSortKey(sortKey);
+      setOrder(order);
+      setPageSize(pageSize);
+      setRestored(true);
+    } else {
+      setRestored(true);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (restored) {
+      getProjectsSimple(serializeFilters(), sortKey, order, pageSize, 1);
+      getProjectCount(serializeFilters());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restored]);
   if (!projects || projects.length === 0) {
     return <p>No data available</p>;
   }
@@ -153,35 +183,20 @@ const ProjectTable = () => {
       <div></div>
       <FilterDiv>
         <label>Filter by:</label>
-        {/* <select
-          value={filter.city[0] || ''}
-          onChange={(e) =>
-            setFilter((prev) => ({
-              ...prev,
-              city: e.target.value ? [e.target.value] : []
-            }))
-          }
-        >
-          <option value="">All Cities</option>
-          {((cities as unknown as City[]) ?? []).map((city) => (
-            <option key={city.id} value={city.name}>
-              {city.name}
-            </option>
-          ))}
-        </select> */}
+
         <DropdownCheckbox
           options={((cities as unknown as City[]) ?? []).map((c) => c.name)}
-          selected={filter.city}
+          selected={filterDraft.city}
           onChange={(cityArr) =>
-            setFilter((prev) => ({ ...prev, city: cityArr }))
+            setFilterDraft((prev) => ({ ...prev, city: cityArr }))
           }
           label="City"
         />
         <DropdownCheckbox
           options={statuses}
-          selected={filter.status}
+          selected={filterDraft.status}
           onChange={(statusArr) =>
-            setFilter((prev) => ({ ...prev, status: statusArr }))
+            setFilterDraft((prev) => ({ ...prev, status: statusArr }))
           }
           label="Status"
         />
@@ -189,9 +204,9 @@ const ProjectTable = () => {
           options={((metroAreas as unknown as MetroArea[]) ?? []).map(
             (m) => m.name
           )}
-          selected={filter.metroArea}
+          selected={filterDraft.metroArea}
           onChange={(metroAreaArr) =>
-            setFilter((prev) => ({ ...prev, metroArea: metroAreaArr }))
+            setFilterDraft((prev) => ({ ...prev, metroArea: metroAreaArr }))
           }
           label="Metro Area"
         />
@@ -199,9 +214,9 @@ const ProjectTable = () => {
           options={((countries as unknown as Country[]) ?? []).map(
             (c) => c.name
           )}
-          selected={filter.country}
+          selected={filterDraft.country}
           onChange={(countryArr) =>
-            setFilter((prev) => ({ ...prev, country: countryArr }))
+            setFilterDraft((prev) => ({ ...prev, country: countryArr }))
           }
           label="Country"
         />
@@ -209,9 +224,12 @@ const ProjectTable = () => {
           options={((buildingTypes as unknown as BuildingType[]) ?? []).map(
             (b) => b.buildingType
           )}
-          selected={filter.buildingType}
+          selected={filterDraft.buildingType}
           onChange={(buildingTypeArr) =>
-            setFilter((prev) => ({ ...prev, buildingType: buildingTypeArr }))
+            setFilterDraft((prev) => ({
+              ...prev,
+              buildingType: buildingTypeArr
+            }))
           }
           label="Building Type"
         />
@@ -219,61 +237,65 @@ const ProjectTable = () => {
           options={((buildingUses as unknown as BuildingUse[]) ?? []).map(
             (b) => b.buildingUse
           )}
-          selected={filter.buildingUse}
+          selected={filterDraft.buildingUse}
           onChange={(buildingUseArr) =>
-            setFilter((prev) => ({ ...prev, buildingUse: buildingUseArr }))
+            setFilterDraft((prev) => ({ ...prev, buildingUse: buildingUseArr }))
           }
           label="Building Use"
         />
         <input
           type="number"
           placeholder="Min Budget"
-          value={filter.minBudget}
+          value={filterDraft.minBudget}
           onChange={(e) =>
-            setFilter((prev) => ({ ...prev, minBudget: e.target.value }))
+            setFilterDraft((prev) => ({ ...prev, minBudget: e.target.value }))
           }
         />
         <input
           type="number"
           placeholder="Max Budget"
-          value={filter.maxBudget}
+          value={filterDraft.maxBudget}
           onChange={(e) =>
-            setFilter((prev) => ({ ...prev, maxBudget: e.target.value }))
+            setFilterDraft((prev) => ({ ...prev, maxBudget: e.target.value }))
           }
         />
         <input
           type="number"
           placeholder="Min Height (m)"
-          value={filter.minHeightMeters}
+          value={filterDraft.minHeightMeters}
           onChange={(e) =>
-            setFilter((prev) => ({ ...prev, minHeightMeters: e.target.value }))
+            setFilterDraft((prev) => ({
+              ...prev,
+              minHeightMeters: e.target.value
+            }))
           }
         />
         <input
           type="number"
           placeholder="Max Height (m)"
-          value={filter.maxHeightMeters}
+          value={filterDraft.maxHeightMeters}
           onChange={(e) =>
-            setFilter((prev) => ({ ...prev, maxHeightMeters: e.target.value }))
+            setFilterDraft((prev) => ({
+              ...prev,
+              maxHeightMeters: e.target.value
+            }))
           }
         />
         <button
-          onClick={() =>
-            getProjectsSimple(
-              serializeFilters(),
-              sortKey,
-              order,
-              pageSize,
-              page
-            )
-          }
+          onClick={() => {
+            setFilters(filterDraft);
+            localStorage.setItem(
+              'projectTableState',
+              JSON.stringify({ filters: filterDraft, sortKey, order, pageSize })
+            );
+          }}
           style={{ marginRight: 8 }}
         >
           Set Filters
         </button>
         <button
           onClick={() => {
-            setFilter({
+            setFilters({
               city: [],
               status: [],
               metroArea: [],
@@ -287,6 +309,19 @@ const ProjectTable = () => {
             });
             // Optionally fetch all projects after clearing
             getProjectsSimple('', sortKey, order, pageSize, page);
+            setFilterDraft({
+              city: [],
+              status: [],
+              metroArea: [],
+              country: [],
+              buildingType: [],
+              buildingUse: [],
+              minBudget: '',
+              maxBudget: '',
+              minHeightMeters: '',
+              maxHeightMeters: ''
+            });
+            localStorage.removeItem('projectTableState');
           }}
         >
           Clear Filters
@@ -321,6 +356,7 @@ const ProjectTable = () => {
               page + 1
             );
           }}
+          disabled={page >= pageCount}
         >
           Next
         </button>
@@ -349,6 +385,17 @@ const ProjectTable = () => {
           }}
         >
           Set Page Size
+        </button>
+      </div>
+      <span>Total projects with these filters: {projectCount}</span>
+      <div style={{ margin: '16px 0' }}>
+        <button
+          onClick={() => {
+            getProjectsSimple(serializeFilters(), sortKey, order, pageSize, 1);
+            getProjectCount(serializeFilters());
+          }}
+        >
+          Refresh
         </button>
       </div>
       <Table>

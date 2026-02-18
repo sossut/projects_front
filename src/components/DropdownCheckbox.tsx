@@ -26,8 +26,11 @@ const DropdownCheckbox: React.FC<DropdownCheckboxProps> = ({
   label
 }) => {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
-
+  const filteredOptions = options.filter((option) =>
+    option.toLowerCase().includes(search.toLowerCase())
+  );
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -50,6 +53,20 @@ const DropdownCheckbox: React.FC<DropdownCheckboxProps> = ({
         {label} {selected.length > 0 ? `(${selected.length})` : ''}
       </button>
       {open && (
+        <input
+          type="text"
+          placeholder="Search..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            width: '70%',
+            boxSizing: 'border-box',
+            marginBottom: 8,
+            padding: 4
+          }}
+        />
+      )}
+      {open && (
         <div
           style={{
             position: 'absolute',
@@ -63,10 +80,17 @@ const DropdownCheckbox: React.FC<DropdownCheckboxProps> = ({
             overflowY: 'auto'
           }}
         >
-          {options.map((option) => (
+          {filteredOptions.map((option) => (
             <DropdownLabel
               key={option}
               style={{ display: 'block', marginBottom: 4 }}
+              onClick={() => {
+                if (selected.includes(option)) {
+                  onChange(selected.filter((s) => s !== option));
+                } else {
+                  onChange([...selected, option]);
+                }
+              }}
             >
               <input
                 type="checkbox"
