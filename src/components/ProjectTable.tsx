@@ -387,7 +387,9 @@ const ProjectTable = () => {
           Set Page Size
         </button>
       </div>
-      <span>Total projects with these filters: {projectCount}</span>
+      <div style={{ margin: '16px 0' }}>
+        Total projects with these filters: {projectCount}
+      </div>
       <div style={{ margin: '16px 0' }}>
         <button
           onClick={() => {
