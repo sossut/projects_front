@@ -469,19 +469,20 @@ const ProjectTable = () => {
             </tr>
           ))}
         </tbody>
-        {isModalOpen === 'image' && selectedImage && (
-          <ProjectImageModal
-            imageUrl={selectedImage}
-            onClose={() => setIsModalOpen(null)}
-          />
-        )}
-        {isModalOpen === 'info' && selectedProjectId !== null && (
-          <ProjectInfoModal
-            id={selectedProjectId}
-            onClose={() => setIsModalOpen(null)}
-          />
-        )}
       </Table>
+      {isModalOpen === 'image' && selectedImage && (
+        <ProjectImageModal
+          imageUrl={selectedImage}
+          onClose={() => setIsModalOpen(null)}
+        />
+      )}
+      {isModalOpen === 'info' && selectedProjectId !== null && (
+        <ProjectInfoModal
+          id={selectedProjectId}
+          onClose={() => setIsModalOpen(null)}
+          metroAreas={metroAreas as unknown as MetroArea[] | []}
+        />
+      )}
     </div>
   );
 };

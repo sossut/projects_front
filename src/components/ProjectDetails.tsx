@@ -41,8 +41,8 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
   return (
     <div className="project-details">
       {(project?.projectMedias?.length ?? 0) > 0 && (
-        <tr>
-          <td style={{ padding: '4px 8px' }}>
+        <div>
+          <div style={{ padding: '4px 8px' }}>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               {project?.projectMedias?.map((media) => (
                 <img
@@ -53,8 +53,8 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
                 />
               ))}
             </div>
-          </td>
-        </tr>
+          </div>
+        </div>
       )}
       <table
         style={{ width: '100%', color: '#fff', borderCollapse: 'collapse' }}
@@ -67,6 +67,19 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
           <tr>
             <LabelTD>Country</LabelTD>
             <ValueTD>{project?.address?.country?.name}</ValueTD>
+          </tr>
+          <tr>
+            <LabelTD>Coordinates</LabelTD>
+            <ValueTD>
+              {'latitude' in (project?.address?.location ?? {}) &&
+              'longitude' in (project?.address?.location ?? {})
+                ? `${(project?.address?.location as { latitude: number; longitude: number }).latitude}, ${(project?.address?.location as { latitude: number; longitude: number }).longitude}`
+                : 'N/A'}
+            </ValueTD>
+          </tr>
+          <tr>
+            <LabelTD>Address</LabelTD>
+            <ValueTD>{project?.address?.address}</ValueTD>
           </tr>
           <tr>
             <LabelTD>Status</LabelTD>
@@ -95,7 +108,26 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
             <LabelTD>Expected Completion</LabelTD>
             <ValueTD>{project?.expectedDateText}</ValueTD>
           </tr>
-
+          <tr>
+            <LabelTD>Confidence</LabelTD>
+            <ValueTD>{project?.confidenceScore}</ValueTD>
+          </tr>
+          <tr>
+            <LabelTD>Budget</LabelTD>
+            <ValueTD>
+              {project?.budgetEur
+                ? `${project.budgetEur.toLocaleString()} EUR`
+                : 'N/A'}
+            </ValueTD>
+          </tr>
+          <tr>
+            <LabelTD>Glass Facade</LabelTD>
+            <ValueTD>{project?.glassFacade}</ValueTD>
+          </tr>
+          <tr>
+            <LabelTD>Facade Basis</LabelTD>
+            <ValueTD>{project?.facadeBasis}</ValueTD>
+          </tr>
           {(project?.projectWebsites?.length ?? 0) > 0 && (
             <tr>
               <LabelTD>Websites</LabelTD>
@@ -249,12 +281,12 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
               </ValueTD>
             </tr>
           )}
-          {(project?.sources?.length ?? 0) > 0 && (
+          {(project?.sourceLinks?.length ?? 0) > 0 && (
             <tr>
               <LabelTD>Sources</LabelTD>
               <ValueTD>
                 <Ul>
-                  {project?.sources?.map((link) => (
+                  {project?.sourceLinks?.map((link) => (
                     <Li key={link.id}>
                       <a
                         href={link.url}

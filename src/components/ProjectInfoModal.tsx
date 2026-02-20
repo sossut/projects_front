@@ -8,10 +8,12 @@ import ProjectDetails from './ProjectDetails';
 import ProjectEdit from './ProjectEdit';
 import ProjectModalOptionsMenu from './ProjectModalOptionsMenu';
 import ProjectViewJson from './ProjectViewJson';
+import type { MetroArea } from '../interfaces/MetroArea';
 
 interface ProjectInfoModalProps {
   id: number;
   onClose: () => void;
+  metroAreas?: MetroArea[] | [];
 }
 
 const ModalBackground = styled.div`
@@ -44,7 +46,11 @@ const ModalContent = styled.div`
   max-height: 80vh;
 `;
 
-const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ id, onClose }) => {
+const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
+  id,
+  onClose,
+  metroAreas
+}) => {
   const { getProject } = useProjects();
   const [project, setProject] = React.useState<Project | null>(null);
   const [view, setView] = React.useState<'details' | 'edit' | 'json'>(
@@ -132,7 +138,11 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({ id, onClose }) => {
           </div>
           {view === 'details' && <ProjectDetails project={project} />}
           {view === 'edit' && project && (
-            <ProjectEdit project={project} onClose={onClose} />
+            <ProjectEdit
+              project={project}
+              onClose={onClose}
+              metroAreas={metroAreas}
+            />
           )}
           {view === 'json' && <ProjectViewJson id={project?.id || 0} />}
         </ModalContent>

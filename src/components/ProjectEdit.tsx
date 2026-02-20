@@ -5,20 +5,68 @@ import type { Project } from '../interfaces/Project';
 
 import styled from 'styled-components';
 import type { BuildingUse } from '../interfaces/BuildingUse';
+import DropdownCheckbox from './DropdownCheckbox';
+import type { Consultant } from '../interfaces/Consultant';
+import ContactEditModal from './ContactEditModal';
+import type { MetroArea } from '../interfaces/MetroArea';
 
 const EditContainer = styled.div`
   padding: 20px;
 `;
 
+const FormGroup = styled.div`
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  label {
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  input,
+  select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+`;
+
 interface ProjectEditProps {
   project: Project;
   onClose: () => void;
+  metroAreas?: MetroArea[] | [];
 }
 
-const ProjectEdit: React.FC<ProjectEditProps> = ({ project, onClose }) => {
+const ProjectEdit: React.FC<ProjectEditProps> = ({
+  project,
+  onClose,
+  metroAreas
+}) => {
   const { buildingUses, getBuildingUses } = useBuildingUses();
   const { updateProject } = useProjects();
-  const [formData, setFormData] = React.useState<Project>(project);
+  const [formData, setFormData] = React.useState<Project>({
+    ...project,
+    consultants: (project.consultants || []).filter(
+      (c) => c && c.name // Ensure we only include valid consultants
+    ) as Consultant[],
+    architects: (project.architects || []).filter(
+      (a) => a && a.name // Ensure we only include valid architects
+    ) as Consultant[],
+    contractors: (project.contractors || []).filter(
+      (c) => c && c.name // Ensure we only include valid contractors
+    ) as Consultant[],
+    developers: (project.developers || []).filter(
+      (d) => d && d.name // Ensure we only include valid developers
+    ) as Consultant[],
+    projectMedias: (project.projectMedias || []).filter(
+      (m) => m && m.url // Ensure we only include valid media entries
+    )
+  });
+
+  const [isConctactModalOpen, setIsContactModalOpen] = React.useState(false);
+  const [editingOperator, setEditingOperator] = React.useState<{
+    type: 'consultant' | 'architect' | 'contractor' | 'developer';
+    index: number;
+  } | null>(null);
   useEffect(() => {
     getBuildingUses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,17 +94,20 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({ project, onClose }) => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
+    console.log('Submitting form with data:', formData);
     await updateProject(project.id as number, formData);
     onClose();
   };
-
+  React.useEffect(() => {
+    console.log(formData);
+  }, [formData]);
   return (
     <EditContainer>
       <h2>Edit Project</h2>
       <form onSubmit={handleSubmit}>
-        <div>
+        <FormGroup>
           <label>Name:</label>
           <input
             type="text"
@@ -64,8 +115,122 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({ project, onClose }) => {
             value={formData.name}
             onChange={handleChange}
           />
-        </div>
-        <div>
+        </FormGroup>
+        <FormGroup>
+          <label>Media</label>
+          {Array.isArray(formData.projectMedias) &&
+          formData.projectMedias.length > 0 ? (
+            formData.projectMedias.map((media, idx) => (
+              <div
+                key={media.id ?? idx}
+                style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+              >
+                <input
+                  type="text"
+                  value={media.url || ''}
+                  onChange={(e) => {
+                    const newMedias = [...(formData.projectMedias || [])];
+                    newMedias[idx] = { ...media, url: e.target.value };
+                    setFormData((prev) => ({
+                      ...prev,
+                      projectMedias: newMedias
+                    }));
+                  }}
+                  placeholder="Media URL"
+                />
+                <input
+                  type="text"
+                  value={media.title || ''}
+                  onChange={(e) => {
+                    const newMedias = [...(formData.projectMedias || [])];
+                    newMedias[idx] = { ...media, title: e.target.value };
+                    setFormData((prev) => ({
+                      ...prev,
+                      projectMedias: newMedias
+                    }));
+                  }}
+                  placeholder="Title"
+                />
+                <input
+                  type="text"
+                  value={media.mediaType || ''}
+                  onChange={(e) => {
+                    const newMedias = [...(formData.projectMedias || [])];
+                    newMedias[idx] = { ...media, mediaType: e.target.value };
+                    setFormData((prev) => ({
+                      ...prev,
+                      projectMedias: newMedias
+                    }));
+                  }}
+                  placeholder="Media Type"
+                />
+                <input
+                  type="text"
+                  value={media.filename || ''}
+                  onChange={(e) => {
+                    const newMedias = [...(formData.projectMedias || [])];
+                    newMedias[idx] = { ...media, filename: e.target.value };
+                    setFormData((prev) => ({
+                      ...prev,
+                      projectMedias: newMedias
+                    }));
+                  }}
+                  placeholder="Filename"
+                />
+                <input
+                  type="text"
+                  value={media.sourcePage || ''}
+                  onChange={(e) => {
+                    const newMedias = [...(formData.projectMedias || [])];
+                    newMedias[idx] = { ...media, sourcePage: e.target.value };
+                    setFormData((prev) => ({
+                      ...prev,
+                      projectMedias: newMedias
+                    }));
+                  }}
+                  placeholder="Source Page"
+                />
+                <button
+                  type="button"
+                  style={{ color: 'red' }}
+                  onClick={() => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      projectMedias:
+                        prev.projectMedias?.filter((_, i) => i !== idx) || []
+                    }));
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            ))
+          ) : (
+            <p style={{ color: '#888' }}>No media</p>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setFormData((prev) => ({
+                ...prev,
+                projectMedias: [
+                  ...(prev.projectMedias || []),
+                  {
+                    url: '',
+                    title: '',
+                    mediaType: '',
+                    filename: '',
+                    sourcePage: '',
+                    projectId: project.id as number // <-- add this line
+                  }
+                ]
+              }));
+            }}
+          >
+            Add Media
+          </button>
+        </FormGroup>
+        <FormGroup>
           <h3>Address</h3>
           <div>
             <label>Country:</label>
@@ -78,12 +243,19 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({ project, onClose }) => {
           </div>
           <div>
             <label>Metropolitan Area:</label>
-            <input
-              type="text"
-              name="address.metroArea.name"
-              value={formData.address?.metroArea?.name || ''}
+            <select
+              name="address.metroAreaId"
+              value={(formData.address?.city?.metroAreaId as number) || ''}
               onChange={handleChange}
-            />
+            >
+              <option value="">Select Metro Area</option>
+              {Array.isArray(metroAreas) &&
+                metroAreas.map((metro) => (
+                  <option key={metro.id} value={metro.id}>
+                    {metro.name}
+                  </option>
+                ))}
+            </select>
           </div>
           <div>
             <label>City:</label>
@@ -112,9 +284,6 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({ project, onClose }) => {
               onChange={handleChange}
             />
           </div>
-        </div>
-        <div>
-          <h4>Location Coordinates</h4>
           <div>
             <label>Latitude:</label>
             <input
@@ -144,108 +313,111 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({ project, onClose }) => {
               onChange={handleChange}
             />
           </div>
-        </div>
-        <div>
-          <label>Budget €:</label>
-          <input
-            type="number"
-            name="budgetEur"
-            value={formData.budgetEur || ''}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Building Height Meters:</label>
-          <input
-            type="number"
-            name="buildingHeightMeters"
-            value={formData.buildingHeightMeters || ''}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Building Height Floors:</label>
-          <input
-            type="number"
-            name="buildingHeightFloors"
-            value={formData.buildingHeightFloors || ''}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Building Type:</label>
-          <select
-            name="buildingTypeId"
-            value={(formData.buildingTypeId as number) || ''}
-            onChange={handleChange}
-          >
-            <option value="">Select Type</option>
-            <option value="2">Skyscraper</option>
-            <option value="1">High-rise</option>
-            <option value="3">Major civic or commercial building</option>
-            <option value="4">Industrial building</option>
-          </select>
-        </div>
-        <div>
-          <label>Building Uses:</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        </FormGroup>
+        <FormGroup>
+          <div>
+            <label>Budget €:</label>
+            <input
+              type="number"
+              name="budgetEur"
+              value={formData.budgetEur || ''}
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            <label>Building Height Meters:</label>
+            <input
+              type="number"
+              name="buildingHeightMeters"
+              value={formData.buildingHeightMeters || ''}
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            <label>Building Height Floors:</label>
+            <input
+              type="number"
+              name="buildingHeightFloors"
+              value={formData.buildingHeightFloors || ''}
+              onChange={handleChange}
+            />
+          </div>
+        </FormGroup>
+        <FormGroup>
+          <div>
+            <label>Building Type:</label>
             <select
-              name="buildingUsesSelect"
-              value=""
-              onChange={(e) => {
-                const value = e.target.value;
-                if (!value) return;
-                const selectedUse = (
-                  buildingUses as unknown as BuildingUse[]
-                ).find((use) => use.buildingUse === value);
-                if (!selectedUse) return;
-                setFormData((prev) => ({
-                  ...prev,
-                  buildingUses: Array.isArray(prev.buildingUses)
-                    ? [...(prev.buildingUses as BuildingUse[]), selectedUse]
-                    : [selectedUse]
-                }));
-              }}
+              name="buildingTypeId"
+              value={(formData.buildingTypeId as number) || ''}
+              onChange={handleChange}
             >
-              <option value="">Add use...</option>
-              {(buildingUses as unknown as BuildingUse[]).map((use) => (
-                <option key={use.id} value={use.buildingUse}>
-                  {use.buildingUse}
-                </option>
-              ))}
-              {/* Add more options as needed */}
+              <option value="">Select Type</option>
+              <option value="2">Skyscraper</option>
+              <option value="1">High-rise</option>
+              <option value="3">Major civic or commercial building</option>
+              <option value="4">Industrial building</option>
             </select>
           </div>
-          <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+          <div>
+            <label>Building Uses:</label>
+            <div style={{ marginBottom: 8 }}>
+              <DropdownCheckbox
+                label="Add Building Uses"
+                options={
+                  Array.isArray(buildingUses)
+                    ? (buildingUses as unknown as BuildingUse[]).map((bu) =>
+                        typeof bu === 'object' && bu !== null
+                          ? bu.buildingUse
+                          : String(bu)
+                      )
+                    : []
+                }
+                selected={
+                  Array.isArray(formData.buildingUses)
+                    ? (formData.buildingUses as BuildingUse[]).map((bu) =>
+                        typeof bu === 'object' && bu !== null
+                          ? bu.buildingUse
+                          : String(bu)
+                      )
+                    : []
+                }
+                onChange={(selected) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    buildingUses: Array.isArray(buildingUses)
+                      ? (buildingUses as unknown as BuildingUse[]).filter(
+                          (bu) =>
+                            selected.includes(
+                              typeof bu === 'object' && bu !== null
+                                ? bu.buildingUse
+                                : String(bu)
+                            )
+                        )
+                      : []
+                  }));
+                }}
+              />
+            </div>
             {Array.isArray(formData.buildingUses) &&
+            formData.buildingUses.length > 0 ? (
               formData.buildingUses.map((use, idx) => (
-                <li
+                <div
                   key={idx}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    margin: 0,
+                    gap: 8
+                  }}
                 >
-                  <input
-                    type="text"
-                    value={
-                      typeof use === 'object' && use !== null
-                        ? use.buildingUse
-                        : use
-                    }
-                    onChange={(e) => {
-                      const newUses = [
-                        ...((formData.buildingUses ?? []) as BuildingUse[])
-                      ];
-                      if (typeof use === 'object' && use !== null) {
-                        newUses[idx] = { ...use, buildingUse: e.target.value };
-                      }
-                      setFormData((prev) => ({
-                        ...prev,
-                        buildingUses: newUses as BuildingUse[]
-                      }));
-                    }}
-                    style={{ marginRight: 4 }}
-                  />
+                  <p style={{ margin: 0 }}>
+                    {typeof use === 'object' && use !== null
+                      ? use.buildingUse
+                      : use}
+                  </p>
                   <button
                     type="button"
+                    style={{ color: 'red', marginLeft: 4 }}
                     onClick={() => {
                       setFormData((prev) => ({
                         ...prev,
@@ -256,37 +428,302 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({ project, onClose }) => {
                           | undefined
                       }));
                     }}
-                    style={{ color: 'red' }}
                   >
                     Remove
                   </button>
-                </li>
-              ))}
-          </ul>
-        </div>
-        <div>
+                </div>
+              ))
+            ) : (
+              <p style={{ margin: 0, color: '#888' }}>No building uses</p>
+            )}
+          </div>
+        </FormGroup>
+        <FormGroup>
           <label>Confidence Score:</label>
-          <input
-            type="number"
+          <select
             name="confidenceScore"
             value={formData.confidenceScore || ''}
             onChange={handleChange}
-          />
-        </div>
-        <div>
+          >
+            <option value="">Select Confidence Score</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </FormGroup>
+        <FormGroup>
           <label>Consultants:</label>
-          {/* <input
-            type="date"
-            name="endDate"
-            value={formData.consultants ? JSON.stringify(formData.consultants) : ''}
-            onChange={handleChange}
-          /> */}
-        </div>
+          {Array.isArray(formData.consultants) &&
+          formData.consultants.length > 0 ? (
+            (formData.consultants || []).map((consultant, idx) => (
+              <div
+                key={idx}
+                style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+              >
+                {' '}
+                {}
+                <p style={{ margin: 0 }}>{consultant.name}</p>
+                <button
+                  type="button"
+                  style={{ color: 'blue' }}
+                  onClick={() => {
+                    setEditingOperator({
+                      type: 'consultant',
+                      index: idx
+                    });
+                    setIsContactModalOpen(true);
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  style={{ color: 'red' }}
+                  onClick={() => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      consultants: (prev.consultants as Consultant[]).filter(
+                        (_, i) => i !== idx
+                      )
+                    }));
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            ))
+          ) : (
+            <p style={{ color: '#888' }}>No consultants</p>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setEditingOperator({
+                type: 'consultant',
+                index: -1
+              });
+              setIsContactModalOpen(true);
+            }}
+          >
+            Add Consultant
+          </button>
+        </FormGroup>
+        <FormGroup>
+          <label>Architects:</label>
+          {Array.isArray(formData.architects) &&
+          formData.architects.length > 0 ? (
+            (formData.architects || []).map((architect, idx) => (
+              <div
+                key={idx}
+                style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+              >
+                <p style={{ margin: 0 }}>{architect.name}</p>
+                <button
+                  type="button"
+                  style={{ color: 'blue' }}
+                  onClick={() => {
+                    setEditingOperator({
+                      type: 'architect',
+                      index: idx
+                    });
+                    setIsContactModalOpen(true);
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  style={{ color: 'red' }}
+                  onClick={() => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      architects: (prev.architects as Consultant[]).filter(
+                        (_, i) => i !== idx
+                      )
+                    }));
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            ))
+          ) : (
+            <p style={{ color: '#888' }}>No architects</p>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setEditingOperator({
+                type: 'architect',
+                index: -1
+              });
+              setIsContactModalOpen(true);
+            }}
+          >
+            Add Architect
+          </button>
+        </FormGroup>
+        <FormGroup>
+          <label>Contractors:</label>
+          {Array.isArray(formData.contractors) &&
+          formData.contractors.length > 0 ? (
+            (formData.contractors || []).map((contractor, idx) => (
+              <div
+                key={idx}
+                style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+              >
+                <p style={{ margin: 0 }}>{contractor.name}</p>
+                <button
+                  type="button"
+                  style={{ color: 'blue' }}
+                  onClick={() => {
+                    setEditingOperator({
+                      type: 'contractor',
+                      index: idx
+                    });
+                    setIsContactModalOpen(true);
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  style={{ color: 'red' }}
+                  onClick={() => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      contractors: (prev.contractors as Consultant[]).filter(
+                        (_, i) => i !== idx
+                      )
+                    }));
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            ))
+          ) : (
+            <p style={{ color: '#888' }}>No contractors</p>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setEditingOperator({
+                type: 'contractor',
+                index: -1
+              });
+              setIsContactModalOpen(true);
+            }}
+          >
+            Add Contractor
+          </button>
+        </FormGroup>
+        <FormGroup>
+          <label>Developers:</label>
+          {Array.isArray(formData.developers) &&
+          formData.developers.length > 0 ? (
+            (formData.developers || []).map((developer, idx) => (
+              <div
+                key={idx}
+                style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+              >
+                <p style={{ margin: 0 }}>{developer.name}</p>
+                <button
+                  type="button"
+                  style={{ color: 'blue' }}
+                  onClick={() => {
+                    setEditingOperator({
+                      type: 'developer',
+                      index: idx
+                    });
+                    setIsContactModalOpen(true);
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  style={{ color: 'red' }}
+                  onClick={() => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      developers: (prev.developers as Consultant[]).filter(
+                        (_, i) => i !== idx
+                      )
+                    }));
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            ))
+          ) : (
+            <p style={{ color: '#888' }}>No developers</p>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setEditingOperator({
+                type: 'developer',
+                index: -1
+              });
+              setIsContactModalOpen(true);
+            }}
+          >
+            Add Developer
+          </button>
+        </FormGroup>
+
         <button type="submit">Save</button>
         <button type="button" onClick={onClose}>
           Cancel
         </button>
       </form>
+      {isConctactModalOpen && editingOperator && (
+        <ContactEditModal
+          type={editingOperator.type}
+          onClose={() => {
+            setIsContactModalOpen(false);
+            setEditingOperator(null);
+          }}
+          initialValues={(() => {
+            const item =
+              formData[
+                (editingOperator.type + 's') as
+                  | 'consultants'
+                  | 'architects'
+                  | 'contractors'
+                  | 'developers'
+              ]?.[editingOperator.index];
+            return {
+              name: item?.name || '',
+              email: item?.email || '',
+              phone: item?.phone || '',
+              website: item?.website || ''
+            };
+          })()}
+          open={isConctactModalOpen}
+          onSave={(data) => {
+            setFormData((prev) => {
+              // Helper to map type to property key
+              const key = (editingOperator.type + 's') as
+                | 'consultants'
+                | 'architects'
+                | 'contractors'
+                | 'developers';
+              return {
+                ...prev,
+                [key]: [...(prev[key] as Consultant[]), data]
+              };
+            });
+          }}
+          onCloseWithoutSaving={() => {
+            setIsContactModalOpen(false);
+            setEditingOperator(null);
+          }}
+          editMode="add"
+        />
+      )}
     </EditContainer>
   );
 };

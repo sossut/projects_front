@@ -56,6 +56,10 @@ export interface Project {
       latitude: number;
       longitude: number;
     };
+    location?: {
+      latitude: number;
+      longitude: number;
+    };
   };
   projectWebsites?: ProjectWebsite[] | string[];
   developers?: Developer[];
@@ -65,6 +69,7 @@ export interface Project {
   projectMedias?: ProjectMedia[];
   media?: ProjectMedia[];
   sources?: SourceLink[];
+  sourceLinks?: SourceLink[];
   projects?: Project[];
   address?: Address;
   country?: Country | string;
