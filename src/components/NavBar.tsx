@@ -63,8 +63,8 @@ const NavBar: React.FC = () => {
           <NavLink to="/" className="navbar-link">
             Home
           </NavLink>
-          <NavLink to="/something" className="navbar-link">
-            Something
+          <NavLink to="/updates" className="navbar-link">
+            Updates
           </NavLink>
           <NavLink to="/else" className="navbar-link">
             Else

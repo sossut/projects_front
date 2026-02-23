@@ -18,6 +18,7 @@ import DropdownCheckbox from './DropdownCheckbox';
 import type { MetroArea } from '../interfaces/MetroArea';
 import type { Country } from '../interfaces/Country';
 import type { BuildingType } from '../interfaces/BuildinType';
+import type { Project } from '../interfaces/Project';
 
 const Table = styled.table`
   width: 100%;
@@ -56,7 +57,9 @@ const ProjectTable = () => {
     statuses,
     getStatuses,
     projectCount,
-    getProjectCount
+    getProjectCount,
+    updateProjectInList,
+    getProjectFormatted
   } = useProjects();
   const { cities, getCities } = useCities();
   const { countries, getCountries } = useCountries();
@@ -65,9 +68,9 @@ const ProjectTable = () => {
   const { buildingTypes, getBuildingTypes } = useBuildingTypes();
 
   const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
-  const [selectedProjectId, setSelectedProjectId] = React.useState<
-    number | null
-  >(null);
+  const [selectedProject, setSelectedProject] = React.useState<Project | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = React.useState<null | 'image' | 'info'>(
     null
   );
@@ -94,6 +97,12 @@ const ProjectTable = () => {
 
   const calculatePageCount = (totalCount: number, pageSize: number) => {
     return Math.ceil(totalCount / pageSize);
+  };
+
+  const handleEdit = async (projectId: number) => {
+    const fullProject = await getProjectFormatted(projectId);
+    setSelectedProject(fullProject);
+    setIsModalOpen('info');
   };
 
   const serializeFilters = () => {
@@ -443,7 +452,7 @@ const ProjectTable = () => {
               <TD>{project.expectedDateText}</TD>
 
               <TD>
-                {project.projectMedias?.map((media) => (
+                {project.media?.map((media) => (
                   <img
                     key={media.id}
                     src={media.url}
@@ -459,8 +468,7 @@ const ProjectTable = () => {
               <TD>
                 <button
                   onClick={() => {
-                    setSelectedProjectId(project.id as number);
-                    setIsModalOpen('info');
+                    handleEdit(project.id as number);
                   }}
                 >
                   More Info
@@ -476,11 +484,16 @@ const ProjectTable = () => {
           onClose={() => setIsModalOpen(null)}
         />
       )}
-      {isModalOpen === 'info' && selectedProjectId !== null && (
+      {isModalOpen === 'info' && selectedProject !== null && (
         <ProjectInfoModal
-          id={selectedProjectId}
+          selectedProject={selectedProject}
           onClose={() => setIsModalOpen(null)}
           metroAreas={metroAreas as unknown as MetroArea[] | []}
+          onProjectUpdate={(updatedProject) => {
+            updateProjectInList(updatedProject);
+            setSelectedProject(updatedProject);
+            setIsModalOpen(null);
+          }}
         />
       )}
     </div>

@@ -6,4 +6,6 @@ export interface MetroArea {
   countryId: number;
   lastSearchedAt?: Date;
   country?: Country;
+  doAutomation?: boolean;
+  countryName?: string; // Add this field to hold the country name
 }

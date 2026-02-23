@@ -40,11 +40,11 @@ interface ProjectDetailsProps {
 const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
   return (
     <div className="project-details">
-      {(project?.projectMedias?.length ?? 0) > 0 && (
+      {(project?.media?.length ?? 0) > 0 && (
         <div>
           <div style={{ padding: '4px 8px' }}>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              {project?.projectMedias?.map((media) => (
+              {project?.media?.map((media) => (
                 <img
                   key={media.id}
                   src={media.url}
@@ -62,24 +62,24 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
         <tbody>
           <tr>
             <LabelTD>City</LabelTD>
-            <ValueTD>{project?.address?.city?.name}</ValueTD>
+            <ValueTD>{project?.location?.city}</ValueTD>
           </tr>
           <tr>
             <LabelTD>Country</LabelTD>
-            <ValueTD>{project?.address?.country?.name}</ValueTD>
+            <ValueTD>{project?.location?.country}</ValueTD>
           </tr>
           <tr>
             <LabelTD>Coordinates</LabelTD>
             <ValueTD>
-              {'latitude' in (project?.address?.location ?? {}) &&
-              'longitude' in (project?.address?.location ?? {})
-                ? `${(project?.address?.location as { latitude: number; longitude: number }).latitude}, ${(project?.address?.location as { latitude: number; longitude: number }).longitude}`
+              {'latitude' in (project?.location?.coordinates ?? {}) &&
+              'longitude' in (project?.location?.coordinates ?? {})
+                ? `${(project?.location?.coordinates as { latitude: number; longitude: number }).latitude}, ${(project?.location?.coordinates as { latitude: number; longitude: number }).longitude}`
                 : 'N/A'}
             </ValueTD>
           </tr>
           <tr>
             <LabelTD>Address</LabelTD>
-            <ValueTD>{project?.address?.address}</ValueTD>
+            <ValueTD>{project?.location?.address}</ValueTD>
           </tr>
           <tr>
             <LabelTD>Status</LabelTD>
@@ -281,12 +281,12 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
               </ValueTD>
             </tr>
           )}
-          {(project?.sourceLinks?.length ?? 0) > 0 && (
+          {(project?.sources?.length ?? 0) > 0 && (
             <tr>
               <LabelTD>Sources</LabelTD>
               <ValueTD>
                 <Ul>
-                  {project?.sourceLinks?.map((link) => (
+                  {project?.sources?.map((link) => (
                     <Li key={link.id}>
                       <a
                         href={link.url}

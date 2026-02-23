@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Project } from '../interfaces/Project';
+import type { MetroArea } from '../interfaces/MetroArea';
 
 const baseUrl = 'http://localhost:5000/api/v1';
 const fetchJson = async (url: string, options = {}) => {
@@ -60,6 +61,54 @@ const useProjects = () => {
         `${baseUrl}/projects/simple?${filters}${sortBy ? `&sortBy=${sortBy}` : ''}${order ? `&order=${order}` : ''}${limit ? `&limit=${limit}` : ''}${page ? `&page=${page}` : ''}`
       );
       setProjects(response);
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const extractSummaryFields = (project: Project) => {
+    return {
+      id: project.id,
+      name: project.name,
+      status: project.status,
+      budgetEur: project.budgetEur,
+      buildingHeightMeters: project.buildingHeightMeters,
+      buildingHeightFloors: project.buildingHeightFloors,
+      glassFacade: project.glassFacade,
+      facadeBasis: project.facadeBasis,
+      buildingType: project.buildingType,
+      buildingUse: project.buildingUse,
+      country: project.country,
+      city: project.city,
+      expectedDate: project.expectedDate,
+      lastVerifiedDate: project.lastVerifiedDate,
+      media: project.media
+    };
+  };
+
+  const updateProjectInList = (updatedProject: Project) => {
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === updatedProject.id
+          ? { ...p, ...extractSummaryFields(updatedProject) }
+          : p
+      )
+    );
+  };
+
+  const getProjectSimpleById = async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`getProjectSimpleById: ${id}`);
+      const data = await fetchJson(`${baseUrl}/projects/simple/${id}`);
+      return data;
     } catch (e) {
       if (e instanceof Error) {
         setError(e.message);
@@ -180,7 +229,8 @@ const useProjects = () => {
     getProjectsSimple,
     getProjectCount,
     getProject,
-
+    getProjectSimpleById,
+    updateProjectInList,
     getStatuses,
     getProjectFormatted,
     updateProject
@@ -309,7 +359,7 @@ const useCountries = () => {
 };
 
 const useMetroAreas = () => {
-  const [metroAreas, setMetroAreas] = useState<string[]>([]);
+  const [metroAreas, setMetroAreas] = useState<MetroArea[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const getMetroAreas = async () => {
@@ -330,11 +380,59 @@ const useMetroAreas = () => {
     }
   };
 
+  const getMetroArea = async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`getMetroArea: ${id}`);
+      const data = await fetchJson(`${baseUrl}/metro-areas/${id}`);
+      return data;
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateMetroArea = async (
+    id: number,
+    updatedData: Partial<{ name: string; doAutomation: boolean }>
+  ) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`updateMetroArea: ${id}`, updatedData);
+      const response = await fetchJson(`${baseUrl}/metro-areas/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+      return response;
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     metroAreas,
     loading,
     error,
-    getMetroAreas
+    setMetroAreas,
+    getMetroAreas,
+    getMetroArea,
+    updateMetroArea
   };
 };
 

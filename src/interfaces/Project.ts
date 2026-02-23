@@ -74,4 +74,8 @@ export interface Project {
   address?: Address;
   country?: Country | string;
   city?: City | string;
+  deletedProperties?: {
+    field: string;
+    id: number;
+  }[];
 }

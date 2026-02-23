@@ -9,6 +9,7 @@ import DropdownCheckbox from './DropdownCheckbox';
 import type { Consultant } from '../interfaces/Consultant';
 import ContactEditModal from './ContactEditModal';
 import type { MetroArea } from '../interfaces/MetroArea';
+import type { ProjectWebsite } from '../interfaces/ProjectWebsite';
 
 const EditContainer = styled.div`
   padding: 20px;
@@ -34,15 +35,17 @@ interface ProjectEditProps {
   project: Project;
   onClose: () => void;
   metroAreas?: MetroArea[] | [];
+  onProjectUpdate: (updatedProject: Project) => void;
 }
 
 const ProjectEdit: React.FC<ProjectEditProps> = ({
   project,
   onClose,
-  metroAreas
+  metroAreas,
+  onProjectUpdate
 }) => {
   const { buildingUses, getBuildingUses } = useBuildingUses();
-  const { updateProject } = useProjects();
+  const { updateProject, getProjectSimpleById } = useProjects();
   const [formData, setFormData] = React.useState<Project>({
     ...project,
     consultants: (project.consultants || []).filter(
@@ -57,11 +60,18 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
     developers: (project.developers || []).filter(
       (d) => d && d.name // Ensure we only include valid developers
     ) as Consultant[],
-    projectMedias: (project.projectMedias || []).filter(
+    media: (project.media || []).filter(
       (m) => m && m.url // Ensure we only include valid media entries
-    )
+    ),
+    projectWebsites: (project.projectWebsites || []).filter(
+      (w): w is ProjectWebsite =>
+        typeof w === 'object' &&
+        w !== null &&
+        'url' in w &&
+        typeof w.url === 'string'
+    ) as ProjectWebsite[]
   });
-
+  const [removals, setRemovals] = React.useState<Record<string, number[]>>({});
   const [isConctactModalOpen, setIsContactModalOpen] = React.useState(false);
   const [editingOperator, setEditingOperator] = React.useState<{
     type: 'consultant' | 'architect' | 'contractor' | 'developer';
@@ -94,10 +104,28 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
     }
   };
 
+  const addToRemovals = (field: string, id: number) => {
+    setRemovals((prev) => ({
+      ...prev,
+      [field]: [...(prev[field] ?? []), id]
+    }));
+  };
+
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     console.log('Submitting form with data:', formData);
-    await updateProject(project.id as number, formData);
+    const dataToSubmit = {
+      ...formData,
+      removals
+    };
+    const updatedProject = await updateProject(
+      project.id as number,
+      dataToSubmit
+    );
+    const projectSimple = await getProjectSimpleById(
+      updatedProject.id as number
+    );
+    onProjectUpdate(projectSimple);
     onClose();
   };
   React.useEffect(() => {
@@ -118,22 +146,26 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
         </FormGroup>
         <FormGroup>
           <label>Media</label>
-          {Array.isArray(formData.projectMedias) &&
-          formData.projectMedias.length > 0 ? (
-            formData.projectMedias.map((media, idx) => (
+          {Array.isArray(formData.media) && formData.media.length > 0 ? (
+            formData.media.map((media, idx) => (
               <div
                 key={media.id ?? idx}
                 style={{ display: 'flex', alignItems: 'center', gap: 8 }}
               >
+                <img
+                  src={media.url}
+                  alt={media.title || 'Project Media'}
+                  style={{ width: 100, height: 100, objectFit: 'cover' }}
+                />
                 <input
                   type="text"
                   value={media.url || ''}
                   onChange={(e) => {
-                    const newMedias = [...(formData.projectMedias || [])];
+                    const newMedias = [...(formData.media || [])];
                     newMedias[idx] = { ...media, url: e.target.value };
                     setFormData((prev) => ({
                       ...prev,
-                      projectMedias: newMedias
+                      media: newMedias
                     }));
                   }}
                   placeholder="Media URL"
@@ -142,11 +174,11 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
                   type="text"
                   value={media.title || ''}
                   onChange={(e) => {
-                    const newMedias = [...(formData.projectMedias || [])];
+                    const newMedias = [...(formData.media || [])];
                     newMedias[idx] = { ...media, title: e.target.value };
                     setFormData((prev) => ({
                       ...prev,
-                      projectMedias: newMedias
+                      media: newMedias
                     }));
                   }}
                   placeholder="Title"
@@ -155,11 +187,11 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
                   type="text"
                   value={media.mediaType || ''}
                   onChange={(e) => {
-                    const newMedias = [...(formData.projectMedias || [])];
+                    const newMedias = [...(formData.media || [])];
                     newMedias[idx] = { ...media, mediaType: e.target.value };
                     setFormData((prev) => ({
                       ...prev,
-                      projectMedias: newMedias
+                      media: newMedias
                     }));
                   }}
                   placeholder="Media Type"
@@ -168,11 +200,11 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
                   type="text"
                   value={media.filename || ''}
                   onChange={(e) => {
-                    const newMedias = [...(formData.projectMedias || [])];
+                    const newMedias = [...(formData.media || [])];
                     newMedias[idx] = { ...media, filename: e.target.value };
                     setFormData((prev) => ({
                       ...prev,
-                      projectMedias: newMedias
+                      media: newMedias
                     }));
                   }}
                   placeholder="Filename"
@@ -181,11 +213,11 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
                   type="text"
                   value={media.sourcePage || ''}
                   onChange={(e) => {
-                    const newMedias = [...(formData.projectMedias || [])];
+                    const newMedias = [...(formData.media || [])];
                     newMedias[idx] = { ...media, sourcePage: e.target.value };
                     setFormData((prev) => ({
                       ...prev,
-                      projectMedias: newMedias
+                      media: newMedias
                     }));
                   }}
                   placeholder="Source Page"
@@ -196,9 +228,11 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
                   onClick={() => {
                     setFormData((prev) => ({
                       ...prev,
-                      projectMedias:
-                        prev.projectMedias?.filter((_, i) => i !== idx) || []
+                      media: prev.media?.filter((_, i) => i !== idx) || []
                     }));
+                    if (media.id) {
+                      addToRemovals('media', media.id);
+                    }
                   }}
                 >
                   Remove
@@ -213,8 +247,8 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
             onClick={() => {
               setFormData((prev) => ({
                 ...prev,
-                projectMedias: [
-                  ...(prev.projectMedias || []),
+                media: [
+                  ...(prev.media || []),
                   {
                     url: '',
                     title: '',
@@ -236,16 +270,16 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
             <label>Country:</label>
             <input
               type="text"
-              name="address.country.name"
-              value={formData.address?.country?.name || ''}
+              name="location.country"
+              value={formData.location?.country || ''}
               onChange={handleChange}
             />
           </div>
           <div>
             <label>Metropolitan Area:</label>
             <select
-              name="address.metroAreaId"
-              value={(formData.address?.city?.metroAreaId as number) || ''}
+              name="location.metroArea"
+              value={formData.location?.metroArea || ''}
               onChange={handleChange}
             >
               <option value="">Select Metro Area</option>
@@ -261,8 +295,8 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
             <label>City:</label>
             <input
               type="text"
-              name="address.city.name"
-              value={formData.address?.city?.name || ''}
+              name="location.city"
+              value={formData.location?.city || ''}
               onChange={handleChange}
             />
           </div>
@@ -270,8 +304,8 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
             <label>Address:</label>
             <input
               type="text"
-              name="address.address"
-              value={formData.address?.address || ''}
+              name="location.address"
+              value={formData.location?.address || ''}
               onChange={handleChange}
             />
           </div>
@@ -279,8 +313,8 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
             <label>Postcode:</label>
             <input
               type="text"
-              name="address.postcode"
-              value={formData.address?.postcode || ''}
+              name="location.postcode"
+              value={formData.location?.postcode || ''}
               onChange={handleChange}
             />
           </div>
@@ -288,11 +322,12 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
             <label>Latitude:</label>
             <input
               type="text"
-              name="address.location.coordinates.latitude"
+              name="location.coordinates.latitude"
               value={
-                (formData.address?.location &&
-                'latitude' in formData.address.location
-                  ? (formData.address.location as { latitude: number }).latitude
+                (formData.location?.coordinates &&
+                'latitude' in formData.location.coordinates
+                  ? (formData.location.coordinates as { latitude: number })
+                      .latitude
                   : '') || ''
               }
               onChange={handleChange}
@@ -302,11 +337,11 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
             <label>Longitude:</label>
             <input
               type="text"
-              name="address.location.coordinates.longitude"
+              name="location.coordinates.longitude"
               value={
-                (formData.address?.location &&
-                'longitude' in formData.address.location
-                  ? (formData.address.location as { longitude: number })
+                (formData.location?.coordinates &&
+                'longitude' in formData.location.coordinates
+                  ? (formData.location.coordinates as { longitude: number })
                       .longitude
                   : '') || ''
               }
@@ -486,6 +521,9 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
                         (_, i) => i !== idx
                       )
                     }));
+                    if (consultant.id) {
+                      addToRemovals('consultants', consultant.id);
+                    }
                   }}
                 >
                   Remove
@@ -541,6 +579,9 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
                         (_, i) => i !== idx
                       )
                     }));
+                    if (architect.id) {
+                      addToRemovals('architects', architect.id);
+                    }
                   }}
                 >
                   Remove
@@ -596,6 +637,9 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
                         (_, i) => i !== idx
                       )
                     }));
+                    if (contractor.id) {
+                      addToRemovals('contractors', contractor.id);
+                    }
                   }}
                 >
                   Remove
@@ -651,6 +695,9 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
                         (_, i) => i !== idx
                       )
                     }));
+                    if (developer.id) {
+                      addToRemovals('developers', developer.id);
+                    }
                   }}
                 >
                   Remove

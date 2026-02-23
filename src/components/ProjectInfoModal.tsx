@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import { useProjects } from '../hooks/ApiHooks';
+import React from 'react';
 import type { Project } from '../interfaces/Project';
 
 import styled from 'styled-components';
@@ -11,9 +10,10 @@ import ProjectViewJson from './ProjectViewJson';
 import type { MetroArea } from '../interfaces/MetroArea';
 
 interface ProjectInfoModalProps {
-  id: number;
+  selectedProject: Project | null;
   onClose: () => void;
   metroAreas?: MetroArea[] | [];
+  onProjectUpdate: (updatedProject: Project) => void;
 }
 
 const ModalBackground = styled.div`
@@ -47,24 +47,15 @@ const ModalContent = styled.div`
 `;
 
 const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
-  id,
+  selectedProject,
   onClose,
-  metroAreas
+  metroAreas,
+  onProjectUpdate
 }) => {
-  const { getProject } = useProjects();
-  const [project, setProject] = React.useState<Project | null>(null);
   const [view, setView] = React.useState<'details' | 'edit' | 'json'>(
     'details'
   );
   const [showOptions, setShowOptions] = React.useState(false);
-  useEffect(() => {
-    (async () => {
-      const data = await getProject(id);
-      console.log(data);
-      setProject(data);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
 
   return (
     <ModalBackground>
@@ -89,7 +80,7 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
                 margin: 0
               }}
             >
-              {project?.name}
+              {selectedProject?.name}
             </h2>
             <button
               onClick={() => setShowOptions((prev) => !prev)}
@@ -136,15 +127,16 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
               </span>
             </button>
           </div>
-          {view === 'details' && <ProjectDetails project={project} />}
-          {view === 'edit' && project && (
+          {view === 'details' && <ProjectDetails project={selectedProject} />}
+          {view === 'edit' && selectedProject && (
             <ProjectEdit
-              project={project}
+              project={selectedProject}
               onClose={onClose}
               metroAreas={metroAreas}
+              onProjectUpdate={onProjectUpdate}
             />
           )}
-          {view === 'json' && <ProjectViewJson id={project?.id || 0} />}
+          {view === 'json' && <ProjectViewJson id={selectedProject?.id || 0} />}
         </ModalContent>
       </Modal>
     </ModalBackground>

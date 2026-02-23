@@ -1,9 +1,10 @@
 import React from 'react';
+import MetroAreasForAutoUpdates from '../components/MetroAreasForAutoUpdates';
 
 const Something: React.FC = () => {
   return (
     <div className="something">
-      <h1>This is the Something Page</h1>
+      <MetroAreasForAutoUpdates />
     </div>
   );
 };
