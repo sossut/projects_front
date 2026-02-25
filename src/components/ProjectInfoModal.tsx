@@ -8,7 +8,7 @@ import ProjectEdit from './ProjectEdit';
 import ProjectModalOptionsMenu from './ProjectModalOptionsMenu';
 import ProjectViewJson from './ProjectViewJson';
 import type { MetroArea } from '../interfaces/MetroArea';
-
+import { useEnrichment } from '../hooks/ApiHooks';
 interface ProjectInfoModalProps {
   selectedProject: Project | null;
   onClose: () => void;
@@ -56,6 +56,25 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
     'details'
   );
   const [showOptions, setShowOptions] = React.useState(false);
+  const { startEnrichmentForProject } = useEnrichment();
+  const startEnrichment = async () => {
+    // Implement the logic to start enrichment for the project here
+    if (
+      window.confirm(
+        `Are you sure you want to start enrichment for ${selectedProject?.name}?`
+      )
+    ) {
+      console.log(
+        `Starting enrichment for project: ${selectedProject?.name} (ID: ${selectedProject?.id})`
+      );
+      const job = await startEnrichmentForProject(selectedProject?.id || 0);
+      console.log('Enrichment job started:', job);
+      alert(
+        `Enrichment job started, job ID: ${job?.jobId || 'unknown'} for project ${selectedProject?.name}`
+      );
+      onClose();
+    }
+  };
 
   return (
     <ModalBackground>
@@ -83,9 +102,20 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
               {selectedProject?.name}
             </h2>
             <button
+              style={{
+                padding: 4,
+
+                background: 'black',
+                color: '#fff'
+              }}
+              onClick={startEnrichment}
+            >
+              Start enrichment
+            </button>
+            <button
               onClick={() => setShowOptions((prev) => !prev)}
               style={{
-                padding: 1,
+                padding: 4,
 
                 background: 'black',
                 color: '#fff'

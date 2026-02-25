@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useMetroAreas } from '../hooks/ApiHooks';
 import type { MetroArea } from '../interfaces/MetroArea';
 import EditMetroArea from './EditMetroArea';
+import StartMetroAreaUpdateModal from './StartMetroAreaUpdateModal';
 
 const Table = styled.table`
   border-collapse: collapse;
@@ -18,7 +19,9 @@ const MetroAreasForAutoUpdates: React.FC = () => {
     useMetroAreas();
 
   const [sortedAreas, setSortedAreas] = React.useState<MetroArea[]>([]);
-  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+  const [isModalOpen, setIsModalOpen] = React.useState<
+    'edit' | 'startUpdate' | false
+  >(false);
   const [selectedArea, setSelectedArea] = React.useState<MetroArea | null>(
     null
   );
@@ -51,7 +54,9 @@ const MetroAreasForAutoUpdates: React.FC = () => {
             <th>Country</th>
             <th>Metro Area</th>
             <th>Automated</th>
+            <th>Last Searched</th>
             <th>Edit</th>
+            <th>Start Update</th>
           </tr>
         </thead>
         <tbody>
@@ -61,27 +66,42 @@ const MetroAreasForAutoUpdates: React.FC = () => {
               <td>{area.name}</td>
               <td>{area.doAutomation ? 'Yes' : 'No'}</td>
               <td>
+                {area.lastSearchedAt
+                  ? new Date(area.lastSearchedAt).toLocaleString()
+                  : 'Never'}
+              </td>
+              <td>
                 <button
                   onClick={() => {
                     setSelectedArea(area);
-                    setIsEditModalOpen(true);
+                    setIsModalOpen('edit');
                   }}
                 >
                   Edit
+                </button>
+              </td>
+              <td>
+                <button
+                  onClick={() => {
+                    setSelectedArea(area);
+                    setIsModalOpen('startUpdate');
+                  }}
+                >
+                  Start Update
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
-      {isEditModalOpen && selectedArea && (
+      {isModalOpen === 'edit' && selectedArea && (
         <EditMetroArea
           id={selectedArea.id}
           name={selectedArea.name}
           doAutomation={selectedArea.doAutomation || false}
           onAreaUpdated={async (data) => {
             console.log('Saving data:', data);
-            setIsEditModalOpen(false);
+            setIsModalOpen(false);
             setSelectedArea(null);
 
             const updatedArea = await getMetroArea(data.id);
@@ -94,7 +114,16 @@ const MetroAreasForAutoUpdates: React.FC = () => {
             );
           }}
           onCancel={() => {
-            setIsEditModalOpen(false);
+            setIsModalOpen(false);
+            setSelectedArea(null);
+          }}
+        />
+      )}
+      {isModalOpen === 'startUpdate' && selectedArea && (
+        <StartMetroAreaUpdateModal
+          metroArea={selectedArea}
+          onClose={() => {
+            setIsModalOpen(false);
             setSelectedArea(null);
           }}
         />

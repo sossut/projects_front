@@ -120,6 +120,7 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
     };
     const updatedProject = await updateProject(
       project.id as number,
+      localStorage.getItem('token') || '',
       dataToSubmit
     );
     const projectSimple = await getProjectSimpleById(
