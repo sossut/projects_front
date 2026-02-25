@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Project } from '../interfaces/Project';
 import type { MetroArea } from '../interfaces/MetroArea';
+import type { Country } from '../interfaces/Country';
 
 const baseUrl = 'http://localhost:5000/api/v1';
 const fetchJson = async (url: string, options = {}) => {
@@ -386,7 +387,7 @@ const useCities = () => {
 };
 
 const useCountries = () => {
-  const [countries, setCountries] = useState<string[]>([]);
+  const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const getCountries = async () => {
@@ -470,6 +471,31 @@ const useMetroAreas = () => {
     }
   };
 
+  const addMetroArea = async (name: string, countryId: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`addMetroArea: ${name}`);
+      const response = await fetchJson(`${baseUrl}/metro-areas`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+        },
+        body: JSON.stringify({ name, countryId })
+      });
+      return response;
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updateMetroArea = async (
     id: number,
     updatedData: Partial<{ name: string; doAutomation: boolean }>
@@ -505,6 +531,7 @@ const useMetroAreas = () => {
     setMetroAreas,
     getMetroAreas,
     getMetroArea,
+    addMetroArea,
     updateMetroArea
   };
 };

@@ -17,6 +17,7 @@ const ProjectViewJson: React.FC<ProjectViewJsonProps> = ({ id }) => {
   \n2. Review all fields for accuracy.\n3. Dont make up new fields.\n
   4. Media  urls should be direct links to media files, not source pages, endiing with .jpg .webp, .png \n
   5. Here is the json schema with enum fields:\n
+  6. Add Contacts to the respective arrays (developers, architects, contractors, consultants) with as much info as possible. \n
   
     {
       "id": "",

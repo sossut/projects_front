@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useMetroAreas } from '../hooks/ApiHooks';
+import { useCountries } from '../hooks/ApiHooks';
 import type { MetroArea } from '../interfaces/MetroArea';
 import EditMetroArea from './EditMetroArea';
 import StartMetroAreaUpdateModal from './StartMetroAreaUpdateModal';
@@ -15,9 +16,14 @@ const Table = styled.table`
 `;
 
 const MetroAreasForAutoUpdates: React.FC = () => {
-  const { getMetroAreas, getMetroArea, metroAreas, setMetroAreas } =
-    useMetroAreas();
-
+  const {
+    getMetroAreas,
+    getMetroArea,
+    metroAreas,
+    setMetroAreas,
+    addMetroArea
+  } = useMetroAreas();
+  const { countries, getCountries } = useCountries();
   const [sortedAreas, setSortedAreas] = React.useState<MetroArea[]>([]);
   const [isModalOpen, setIsModalOpen] = React.useState<
     'edit' | 'startUpdate' | false
@@ -26,8 +32,19 @@ const MetroAreasForAutoUpdates: React.FC = () => {
     null
   );
 
+  const [newMetroArea, setNewMetroArea] = React.useState<{
+    countryId: number | null;
+    continentId: number | null;
+    name: string;
+  }>({
+    countryId: null,
+    continentId: null,
+    name: ''
+  });
+
   React.useEffect(() => {
     getMetroAreas();
+    getCountries();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -45,9 +62,72 @@ const MetroAreasForAutoUpdates: React.FC = () => {
     setSortedAreas(sort);
   }, [metroAreas]);
 
+  const handleAddMetroArea = async () => {
+    const { countryId, name } = newMetroArea;
+    if (!countryId || !name) return;
+    // Implement the logic to add a new metro area here
+    try {
+      const response = await addMetroArea(name, countryId);
+      console.log('Response from adding metro area:', response);
+      // Update the list of metro areas
+      getMetroAreas();
+      // Reset the form after adding
+      setNewMetroArea({
+        countryId: null,
+        continentId: null,
+        name: ''
+      });
+    } catch (error) {
+      console.error('Error adding metro area:', error);
+    }
+  };
   return (
     <>
       <h2>Metro Areas for Auto Updates</h2>
+      <div>
+        <label>Add new metro area</label>
+        <select
+          value={newMetroArea.countryId ?? ''}
+          onChange={(e) => {
+            const countryId = e.target.value ? Number(e.target.value) : null;
+            const selectedCountry = countries.find((c) => c.id === countryId);
+            setNewMetroArea((prev) => ({
+              ...prev,
+              countryId,
+              continentId: selectedCountry ? selectedCountry.continentId : null
+            }));
+          }}
+        >
+          <option value="">Select country</option>
+          {countries.map((country) => (
+            <option key={country.id} value={country.id}>
+              {country.name}
+            </option>
+          ))}
+        </select>
+        <input
+          type="text"
+          placeholder="Metro area name"
+          value={newMetroArea.name}
+          onChange={(e) =>
+            setNewMetroArea((prev) => ({
+              ...prev,
+              name: e.target.value
+            }))
+          }
+        />
+        <button
+          onClick={() => {
+            // Add logic to add new metro area here
+            // Example: call an API or update state
+            // Reset the form after adding
+            handleAddMetroArea();
+          }}
+          disabled={!newMetroArea.countryId || !newMetroArea.name}
+        >
+          Add
+        </button>
+      </div>
       <Table>
         <thead>
           <tr>
