@@ -168,9 +168,9 @@ const ProjectTable = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restored]);
-  if (!projects || projects.length === 0) {
-    return <p>No data available</p>;
-  }
+  // if (!projects || projects.length === 0) {
+  //   return <p>No data available</p>;
+  // }
   return (
     <div>
       <div>
@@ -496,6 +496,66 @@ const ProjectTable = () => {
           }}
         />
       )}
+      <div>
+        <button
+          onClick={() => {
+            setPage((prev) => Math.max(prev - 1, 1));
+            getProjectsSimple(
+              serializeFilters(),
+              sortKey,
+              order,
+              pageSize,
+              Math.max(page - 1, 1)
+            );
+          }}
+        >
+          Previous
+        </button>
+        <span>
+          Page {page} of {pageCount}
+        </span>
+        <button
+          onClick={() => {
+            setPage((prev) => prev + 1);
+            getProjectsSimple(
+              serializeFilters(),
+              sortKey,
+              order,
+              pageSize,
+              page + 1
+            );
+          }}
+          disabled={page >= pageCount}
+        >
+          Next
+        </button>
+        <label>Page Size:</label>
+        <select
+          value={pageSize}
+          onChange={(e) => setPageSize(Number(e.target.value))}
+        >
+          <option value={2}>2</option>
+          <option value={10}>10</option>
+          <option value={25}>25</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+          <option value={200}>200</option>
+        </select>
+        <button
+          onClick={() => {
+            setPage(1);
+            getProjectsSimple(
+              serializeFilters(),
+              sortKey,
+              order,
+              Number(pageSize),
+              1
+            );
+          }}
+        >
+          Set Page Size
+        </button>
+      </div>
     </div>
   );
 };
