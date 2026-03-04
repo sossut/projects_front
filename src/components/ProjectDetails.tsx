@@ -28,8 +28,6 @@ const Ul = styled.ul`
 `;
 
 const Li = styled.li`
-  margin-bottom: 4px;
-  border: 1px solid #555;
   padding: 4px 8px;
 `;
 
@@ -157,7 +155,36 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
               <ValueTD>
                 <Ul>
                   {project?.developers?.map((dev) => (
-                    <Li key={dev.id || dev.name}>{dev.name}</Li>
+                    <div
+                      style={{ border: '1px solid #555' }}
+                      key={dev.id || dev.name}
+                    >
+                      <Li>
+                        <strong>{dev.name}</strong>
+                      </Li>
+                      <Li>
+                        Website:{' '}
+                        <a
+                          href={dev.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {dev.website}
+                        </a>
+                      </Li>
+                      <Li>
+                        Email:{' '}
+                        <a href={`mailto:${dev.contact?.email}`}>
+                          {dev.contact?.email}
+                        </a>
+                      </Li>
+                      <Li>
+                        Phone:{' '}
+                        <a href={`tel:${dev.contact?.phone}`}>
+                          {dev.contact?.phone}
+                        </a>
+                      </Li>
+                    </div>
                   ))}
                 </Ul>
               </ValueTD>
@@ -169,7 +196,36 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
               <ValueTD>
                 <Ul>
                   {project?.architects?.map((arch) => (
-                    <Li key={arch.id || arch.name}>{arch.name}</Li>
+                    <div
+                      key={arch.id || arch.name}
+                      style={{ border: '1px solid #555' }}
+                    >
+                      <Li>
+                        <strong>{arch.name}</strong>
+                      </Li>
+                      <Li>
+                        Website:{' '}
+                        <a
+                          href={arch.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {arch.website}
+                        </a>
+                      </Li>
+                      <Li>
+                        Email:{' '}
+                        <a href={`mailto:${arch.contact?.email}`}>
+                          {arch.contact?.email}
+                        </a>
+                      </Li>
+                      <Li>
+                        Phone:{' '}
+                        <a href={`tel:${arch.contact?.phone}`}>
+                          {arch.contact?.phone}
+                        </a>
+                      </Li>
+                    </div>
                   ))}
                 </Ul>
               </ValueTD>
@@ -191,10 +247,10 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
                           <div>
                             Email:{' '}
                             <a
-                              href={`mailto:${consultant.email}`}
+                              href={`mailto:${consultant.contact?.email}`}
                               style={{ color: '#4af' }}
                             >
-                              {consultant.email}
+                              {consultant.contact?.email}
                             </a>
                           </div>
                         )}
@@ -202,10 +258,10 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
                           <div>
                             Phone:{' '}
                             <a
-                              href={`tel:${consultant.phone}`}
+                              href={`tel:${consultant.contact?.phone}`}
                               style={{ color: '#4af' }}
                             >
-                              {consultant.phone}
+                              {consultant.contact?.phone}
                             </a>
                           </div>
                         )}
@@ -244,10 +300,10 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
                           <div>
                             Email:{' '}
                             <a
-                              href={`mailto:${contractor.email}`}
+                              href={`mailto:${contractor.contact?.email}`}
                               style={{ color: '#4af' }}
                             >
-                              {contractor.email}
+                              {contractor.contact?.email}
                             </a>
                           </div>
                         )}
@@ -255,10 +311,10 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
                           <div>
                             Phone:{' '}
                             <a
-                              href={`tel:${contractor.phone}`}
+                              href={`tel:${contractor.contact?.phone}`}
                               style={{ color: '#4af' }}
                             >
-                              {contractor.phone}
+                              {contractor.contact?.phone}
                             </a>
                           </div>
                         )}

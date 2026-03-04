@@ -232,11 +232,7 @@ const useProjects = () => {
     }
   };
 
-  const updateProject = async (
-    id: number,
-    token: string,
-    updatedData: Partial<Project>
-  ) => {
+  const updateProject = async (id: number, updatedData: Partial<Project>) => {
     setLoading(true);
     setError(null);
     try {
@@ -262,6 +258,57 @@ const useProjects = () => {
     }
   };
 
+  const updateProjectNoId = async (updatedData: Partial<Project>) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`updateProjectNoId`, updatedData);
+      const response = await fetchJson(`${baseUrl}/projects/edit`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+        },
+        body: JSON.stringify(updatedData)
+      });
+      return response;
+      // Optionally update local state here if needed
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addProjects = async (projects: Partial<Project>[]) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`addProjects`, projects);
+      const response = await fetchJson(`${baseUrl}/projects/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+        },
+        body: JSON.stringify(projects)
+      });
+      return response;
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     projects,
     loading,
@@ -276,7 +323,9 @@ const useProjects = () => {
     updateProjectInList,
     getStatuses,
     getProjectFormatted,
-    updateProject
+    updateProject,
+    updateProjectNoId,
+    addProjects
   };
 };
 

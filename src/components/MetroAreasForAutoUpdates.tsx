@@ -82,9 +82,9 @@ const MetroAreasForAutoUpdates: React.FC = () => {
     }
   };
   return (
-    <>
-      <h2>Metro Areas for Auto Updates</h2>
-      <div>
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ height: '120px' }}>
+        <h2>Metro Areas for Auto Updates</h2>
         <label>Add new metro area</label>
         <select
           value={newMetroArea.countryId ?? ''}
@@ -208,7 +208,7 @@ const MetroAreasForAutoUpdates: React.FC = () => {
           }}
         />
       )}
-    </>
+    </div>
   );
 };
 

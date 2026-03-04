@@ -21,7 +21,7 @@ import type { BuildingType } from '../interfaces/BuildinType';
 import type { Project } from '../interfaces/Project';
 
 const Table = styled.table`
-  width: 100%;
+  max-width: 100%;
   border-collapse: collapse;
 `;
 
@@ -84,7 +84,9 @@ const ProjectTable = () => {
     minBudget: '',
     maxBudget: '',
     minHeightMeters: '',
-    maxHeightMeters: ''
+    maxHeightMeters: '',
+    firstDate: '',
+    lastDate: ''
   });
   const [filterDraft, setFilterDraft] = React.useState(filters);
 
@@ -172,7 +174,7 @@ const ProjectTable = () => {
   //   return <p>No data available</p>;
   // }
   return (
-    <div>
+    <div style={{ maxWidth: '100%' }}>
       <div>
         <label>Sort by:</label>
         <select onChange={(e) => setSortKey(e.target.value)}>
@@ -290,6 +292,25 @@ const ProjectTable = () => {
             }))
           }
         />
+        <div>
+          <label style={{ display: 'block' }}>Expected Completion Date:</label>
+          <input
+            type="date"
+            placeholder="First expected date"
+            value={filterDraft.firstDate}
+            onChange={(e) =>
+              setFilterDraft((prev) => ({ ...prev, firstDate: e.target.value }))
+            }
+          />
+          <input
+            type="date"
+            placeholder="Last expected date"
+            value={filterDraft.lastDate}
+            onChange={(e) =>
+              setFilterDraft((prev) => ({ ...prev, lastDate: e.target.value }))
+            }
+          />
+        </div>
         <button
           onClick={() => {
             setFilters(filterDraft);
@@ -314,7 +335,9 @@ const ProjectTable = () => {
               minBudget: '',
               maxBudget: '',
               minHeightMeters: '',
-              maxHeightMeters: ''
+              maxHeightMeters: '',
+              firstDate: '',
+              lastDate: ''
             });
             // Optionally fetch all projects after clearing
             getProjectsSimple('', sortKey, order, pageSize, page);
@@ -328,7 +351,9 @@ const ProjectTable = () => {
               minBudget: '',
               maxBudget: '',
               minHeightMeters: '',
-              maxHeightMeters: ''
+              maxHeightMeters: '',
+              firstDate: '',
+              lastDate: ''
             });
             localStorage.removeItem('projectTableState');
           }}
@@ -451,13 +476,18 @@ const ProjectTable = () => {
               <TD>{project.buildingHeightFloors}</TD>
               <TD>{project.expectedDateText}</TD>
 
-              <TD>
+              <TD style={{ display: 'flex', maxWidth: 500, flexWrap: 'wrap' }}>
                 {project.media?.map((media) => (
                   <img
                     key={media.id}
                     src={media.url}
                     alt="Project"
-                    style={{ height: 100, marginRight: 5 }}
+                    style={{
+                      height: 100,
+                      marginRight: 5,
+                      marginBottom: 5,
+                      cursor: 'pointer'
+                    }}
                     onClick={() => {
                       setSelectedImage(media.url);
                       setIsModalOpen('image');
