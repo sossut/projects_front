@@ -288,6 +288,7 @@ const useProjects = () => {
     setLoading(true);
     setError(null);
     try {
+      console.log(projects);
       console.log(`addProjects`, projects);
       const response = await fetchJson(`${baseUrl}/projects/`, {
         method: 'POST',

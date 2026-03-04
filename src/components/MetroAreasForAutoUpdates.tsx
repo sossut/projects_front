@@ -5,6 +5,7 @@ import { useCountries } from '../hooks/ApiHooks';
 import type { MetroArea } from '../interfaces/MetroArea';
 import EditMetroArea from './EditMetroArea';
 import StartMetroAreaUpdateModal from './StartMetroAreaUpdateModal';
+import MetroAreaJsonCopyModal from './MetroAreaJsonCopyModal';
 
 const Table = styled.table`
   border-collapse: collapse;
@@ -26,7 +27,7 @@ const MetroAreasForAutoUpdates: React.FC = () => {
   const { countries, getCountries } = useCountries();
   const [sortedAreas, setSortedAreas] = React.useState<MetroArea[]>([]);
   const [isModalOpen, setIsModalOpen] = React.useState<
-    'edit' | 'startUpdate' | false
+    'edit' | 'startUpdate' | 'copyJson' | false
   >(false);
   const [selectedArea, setSelectedArea] = React.useState<MetroArea | null>(
     null
@@ -137,6 +138,7 @@ const MetroAreasForAutoUpdates: React.FC = () => {
             <th>Last Searched</th>
             <th>Edit</th>
             <th>Start Update</th>
+            <th>Get Json For ChatGPT</th>
           </tr>
         </thead>
         <tbody>
@@ -168,6 +170,16 @@ const MetroAreasForAutoUpdates: React.FC = () => {
                   }}
                 >
                   Start Update
+                </button>
+              </td>
+              <td>
+                <button
+                  onClick={() => {
+                    setSelectedArea(area);
+                    setIsModalOpen('copyJson');
+                  }}
+                >
+                  Get JSON
                 </button>
               </td>
             </tr>
@@ -202,6 +214,15 @@ const MetroAreasForAutoUpdates: React.FC = () => {
       {isModalOpen === 'startUpdate' && selectedArea && (
         <StartMetroAreaUpdateModal
           metroArea={selectedArea}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedArea(null);
+          }}
+        />
+      )}
+      {isModalOpen === 'copyJson' && selectedArea && (
+        <MetroAreaJsonCopyModal
+          metroAreaName={selectedArea.name || ''}
           onClose={() => {
             setIsModalOpen(false);
             setSelectedArea(null);
