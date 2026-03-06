@@ -24,7 +24,7 @@ const ProjectViewJson: React.FC<ProjectViewJsonProps> = ({ id }) => {
       "name": "",
       "buildingType": "Skyscraper | High-rise | Major civic or commercial building | Industrial building",
       "buildingUses": [
-        {buildingUse: "office | residential | mixed-use | hotel | hospital | education | retail | cultural | industrial | logistics | data_center | other"}
+        {buildingUse: "office | residential | mixed-use | hotel | hospital | education | retail | cultural | industrial | logistics | data_center | transport_station | airport | sports_stadium | other"}
         
       ],
       "buildingHeightMeters": null,

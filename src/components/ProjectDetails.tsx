@@ -38,6 +38,15 @@ interface ProjectDetailsProps {
 const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
   return (
     <div className="project-details">
+      <div>
+        <button>Project has been checked</button>
+        {project?.checkedAt && (
+          <div style={{ fontSize: '0.9em', color: '#aaa' }}>
+            Checked by user ID {project.checkedBy} on{' '}
+            {new Date(project.checkedAt as Date).toLocaleDateString()}
+          </div>
+        )}
+      </div>
       {(project?.media?.length ?? 0) > 0 && (
         <div>
           <div style={{ padding: '4px 8px' }}>

@@ -437,6 +437,8 @@ const ProjectTable = () => {
       <Table>
         <THead>
           <tr>
+            <TH>Checked</TH>
+            <TH>Favorited</TH>
             <TH>ID</TH>
             <TH>Name</TH>
             <TH>City</TH>
@@ -454,6 +456,22 @@ const ProjectTable = () => {
         <tbody>
           {projects.map((project) => (
             <tr key={project.id}>
+              {project.checkedBy ? (
+                <TD>
+                  <img src="../assets/check-mark-icon.png" alt="Checked" />
+                </TD>
+              ) : (
+                <TD></TD>
+              )}
+              {project.favoritedByUsers &&
+              project.favoritedByUsers.length > 0 ? (
+                <TD>
+                  <img src="../assets/star-symbol-icon.png" alt="Favorited" />
+                </TD>
+              ) : (
+                <TD></TD>
+              )}
+
               <TD>{project.id}</TD>
               <TD>{project.name}</TD>
               <TD>{project.city as string}</TD>

@@ -33,6 +33,13 @@ export interface Project {
   budgetEur?: number;
   glassFacade?: 'yes' | 'no' | 'unknown' | true | false | 0 | 1 | null | 'null';
   facadeBasis?: string;
+  checkedBy?: number;
+  checkedAt?: Date;
+  favorited?: boolean;
+  favoritedByUsers?: {
+    id: number;
+    username: string;
+  }[];
   status?:
     | 'planned'
     | 'approved'

@@ -88,7 +88,7 @@ const MetroAreaJsonCopyModal: React.FC<MetroAreaJsonCopyModalProps> = ({
                         "name": "",
                         "buildingType": "Skyscraper | High-rise | Major civic or commercial building | Industrial building",
                         "buildingUse": [
-                          "office | residential | mixed-use | hotel | hospital | education | retail | cultural | industrial | logistics | data_center | other"
+                          "office | residential | mixed-use | hotel | hospital | education | retail | cultural | industrial | logistics | data_center | transport_station | airport | sports_stadium | other"
                         ],
                         "buildingHeightMeters": null,
                         "buildingHeightFloors": null,
