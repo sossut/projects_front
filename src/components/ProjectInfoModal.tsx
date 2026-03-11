@@ -14,6 +14,7 @@ interface ProjectInfoModalProps {
   onClose: () => void;
   metroAreas?: MetroArea[] | [];
   onProjectUpdate: (updatedProject: Project) => void;
+  userId?: number;
 }
 
 const ModalBackground = styled.div`
@@ -50,7 +51,8 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
   selectedProject,
   onClose,
   metroAreas,
-  onProjectUpdate
+  onProjectUpdate,
+  userId
 }) => {
   const [view, setView] = React.useState<'details' | 'edit' | 'json'>(
     'details'
@@ -135,7 +137,7 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
               onClick={onClose}
               style={{
                 padding: 0,
-
+                marginRight: 10,
                 background: 'transparent',
                 color: '#fff',
                 border: 'none',
@@ -157,7 +159,13 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
               </span>
             </button>
           </div>
-          {view === 'details' && <ProjectDetails project={selectedProject} />}
+          {view === 'details' && (
+            <ProjectDetails
+              project={selectedProject}
+              onProjectUpdate={onProjectUpdate}
+              userId={userId}
+            />
+          )}
           {view === 'edit' && selectedProject && (
             <ProjectEdit
               project={selectedProject}

@@ -5,6 +5,11 @@ import type { BuildingUse } from '../interfaces/BuildingUse';
 import type { ProjectWebsite } from '../interfaces/ProjectWebsite';
 import type { Consultant } from '../interfaces/Consultant';
 import type { Contractor } from '../interfaces/Contractor';
+import { useProjects } from '../hooks/ApiHooks';
+import unFavoritedIcon from '../assets/star.png';
+import checkedIcon from '../assets/check-mark-icon.png';
+import favoritedIcon from '../assets/star-symbol-icon.png';
+
 const LabelTD = styled.td`
   font-weight: bold;
   padding: 4px 8px;
@@ -33,17 +38,193 @@ const Li = styled.li`
 
 interface ProjectDetailsProps {
   project: Project | null;
+  onProjectUpdate?: (updatedProject: Project) => void;
+  userId?: number;
 }
 
-const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
+const ProjectDetails: React.FC<ProjectDetailsProps> = ({
+  project,
+  onProjectUpdate,
+  userId
+}) => {
+  const { postProjectFavorite, deleteProjectFavorite, updateProject } =
+    useProjects();
+  const username =
+    JSON.parse(localStorage.getItem('user') || 'null')?.user?.username || '';
+  const isFavoritedByCurrentUser = React.useMemo(() => {
+    if (typeof project?.favorited === 'boolean') {
+      return project.favorited;
+    }
+
+    if (!userId || !project?.favoritedByUsers?.length) {
+      return false;
+    }
+
+    return project.favoritedByUsers.some(
+      (favoritedUser) =>
+        favoritedUser.id !== null && favoritedUser.id === userId
+    );
+  }, [project?.favorited, project?.favoritedByUsers, userId]);
+  const [checkedAt, setCheckedAt] = React.useState<string | Date | null>(
+    project?.checkedAt ?? null
+  );
+  const [favorited, setFavorited] = React.useState(isFavoritedByCurrentUser);
+  const [checkedByUsername, setCheckedByUsername] = React.useState(
+    project?.checkedByUsername || ''
+  );
+
+  React.useEffect(() => {
+    setFavorited(isFavoritedByCurrentUser);
+  }, [isFavoritedByCurrentUser]);
+
+  React.useEffect(() => {
+    setCheckedAt(project?.checkedAt ?? null);
+    setCheckedByUsername(project?.checkedByUsername || '');
+  }, [project?.checkedAt, project?.checkedByUsername]);
+
+  React.useEffect(() => {
+    console.log(isFavoritedByCurrentUser);
+  }, [isFavoritedByCurrentUser]);
+  const handleFavorite = async () => {
+    if (!project?.id || !userId) return;
+
+    await postProjectFavorite(project.id);
+    setFavorited(true);
+    onProjectUpdate?.({
+      ...project,
+      favorited: true,
+      favoritedByUsers: [
+        ...(project.favoritedByUsers?.filter(
+          (favoritedUser) =>
+            favoritedUser.id !== null && favoritedUser.id !== userId
+        ) || []),
+        { id: userId, username: username }
+      ]
+    });
+  };
+
+  const handleUnfavorite = async () => {
+    if (!project?.id || !userId) return;
+
+    await deleteProjectFavorite(project.id);
+    setFavorited(false);
+    onProjectUpdate?.({
+      ...project,
+      favorited: false,
+      favoritedByUsers:
+        project.favoritedByUsers?.filter(
+          (favoritedUser) =>
+            favoritedUser.id !== null && favoritedUser.id !== userId
+        ) || []
+    });
+  };
+
+  const handleCheck = async () => {
+    if (!project?.id || !userId) return;
+    await updateProject(project.id, { checkedBy: userId });
+    onProjectUpdate?.({
+      id: project.id,
+      name: project.name,
+      checkedBy: userId,
+      checkedAt: new Date(),
+      checkedByUsername: username
+    } as Project);
+    setCheckedAt(new Date());
+    setCheckedByUsername(username);
+  };
+
+  const handleUncheck = async () => {
+    if (!project?.id || !userId) return;
+    await updateProject(project.id, { checkedBy: null });
+    onProjectUpdate?.({
+      id: project.id,
+      name: project.name,
+      checkedBy: null,
+      checkedAt: null,
+      checkedByUsername: ''
+    } as Project);
+    setCheckedAt(null);
+    setCheckedByUsername('');
+  };
+
   return (
     <div className="project-details">
-      <div>
-        <button>Project has been checked</button>
-        {project?.checkedAt && (
-          <div style={{ fontSize: '0.9em', color: '#aaa' }}>
-            Checked by user ID {project.checkedBy} on{' '}
-            {new Date(project.checkedAt as Date).toLocaleDateString()}
+      <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
+        {(checkedAt && (
+          <div>
+            <div>Project has been checked</div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      'Are you sure you want to mark this project as checked again?'
+                    )
+                  ) {
+                    handleCheck();
+                  }
+                }}
+              >
+                Check again
+              </button>
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      'Are you sure you want to uncheck this project?'
+                    )
+                  ) {
+                    handleUncheck();
+                  }
+                }}
+              >
+                Uncheck
+              </button>
+            </div>
+
+            <div style={{ fontSize: '0.9em', color: '#aaa' }}>
+              Checked by user: {checkedByUsername} on{' '}
+              {new Date(checkedAt).toLocaleDateString()}
+            </div>
+          </div>
+        )) || (
+          <div>
+            <div style={{ color: '#f44' }}>Project has not been checked</div>
+            <button
+              onClick={() => {
+                if (
+                  window.confirm(
+                    'Are you sure you want to mark this project as checked?'
+                  )
+                ) {
+                  handleCheck();
+                }
+              }}
+            >
+              Mark as Checked
+            </button>
+          </div>
+        )}
+        {favorited ? (
+          <div>
+            <div>Project is favorited</div>
+            <button onClick={handleUnfavorite}>
+              <img height={'64px'} src={favoritedIcon} alt="Favorited" />
+            </button>
+            <div style={{ fontSize: '0.9em', color: '#aaa' }}>
+              Favorited by:{' '}
+              {project?.favoritedByUsers
+                ?.filter((u) => u.id !== null && u.username)
+                .map((u) => u.username)
+                .join(', ') || 'unknown'}
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div>Project is not favorited</div>
+            <button onClick={handleFavorite}>
+              <img height={'64px'} src={unFavoritedIcon} alt="Not Favorited" />
+            </button>
           </div>
         )}
       </div>

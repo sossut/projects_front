@@ -4,6 +4,8 @@ import type { MetroArea } from '../interfaces/MetroArea';
 import type { Country } from '../interfaces/Country';
 
 const baseUrl = 'http://localhost:5000/api/v1';
+const token = JSON.parse(localStorage.getItem('user') || '{}')?.token || '';
+
 const fetchJson = async (url: string, options = {}) => {
   try {
     const response = await fetch(url, options);
@@ -34,12 +36,12 @@ const useProjects = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log(`Bearer ${localStorage.getItem('token') || ''}`);
+      console.log(`Bearer ${token}`);
       console.log('getProjects');
       const data = await fetchJson(`${baseUrl}/projects`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         }
       });
       setProjects(data);
@@ -63,14 +65,14 @@ const useProjects = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log(`Bearer ${localStorage.getItem('token') || ''}`);
+      console.log(`Bearer ${token}`);
       console.log('getProjectsSimple');
       const response = await fetchJson(
         `${baseUrl}/projects/simple?${filters}${sortBy ? `&sortBy=${sortBy}` : ''}${order ? `&order=${order}` : ''}${limit ? `&limit=${limit}` : ''}${page ? `&page=${page}` : ''}`,
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
@@ -87,7 +89,7 @@ const useProjects = () => {
   };
 
   const extractSummaryFields = (project: Project) => {
-    return {
+    const fields: Partial<Project> & { checkedByUser?: number } = {
       id: project.id,
       name: project.name,
       status: project.status,
@@ -102,8 +104,16 @@ const useProjects = () => {
       city: project.city,
       expectedDate: project.expectedDate,
       lastVerifiedDate: project.lastVerifiedDate,
-      media: project.media
+      media: project.media,
+      favoritedByUsers: project.favoritedByUsers,
+      checkedAt: project.checkedAt,
+      checkedByUser: project.checkedBy as number,
+      checkedBy: project.checkedBy,
+      checkedByUsername: project.checkedByUsername
     };
+    return Object.fromEntries(
+      Object.entries(fields).filter(([, v]) => v !== undefined)
+    );
   };
 
   const updateProjectInList = (updatedProject: Project) => {
@@ -124,7 +134,7 @@ const useProjects = () => {
       const data = await fetchJson(`${baseUrl}/projects/simple/${id}`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         }
       });
       return data;
@@ -147,11 +157,84 @@ const useProjects = () => {
       const response = await fetchJson(`${baseUrl}/projects/count?${filters}`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         }
       });
       console.log(`${baseUrl}/projects/count?${filters}`);
       setProjectCount(response.count);
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getProjectsBySearch = async (search: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`getProjectsBySearch: ${search}`);
+      const data = await fetchJson(
+        `${baseUrl}/projects/search?q=${encodeURIComponent(search)}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setProjects(data);
+      setProjectCount(data.length);
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const postProjectFavorite = async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`postProjectFavorite: ${id}`);
+      await fetchJson(`${baseUrl}/projects/${id}/favorite`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteProjectFavorite = async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`deleteProjectFavorite: ${id}`);
+      await fetchJson(`${baseUrl}/projects/${id}/favorite`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
     } catch (e) {
       if (e instanceof Error) {
         setError(e.message);
@@ -171,7 +254,7 @@ const useProjects = () => {
       const data = await fetchJson(`${baseUrl}/projects/statuses`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         }
       });
       setStatuses(data);
@@ -194,7 +277,7 @@ const useProjects = () => {
       console.log(`getProjectById: ${id}`);
       const data = await fetchJson(`${baseUrl}/projects/${id}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         }
       });
       return data;
@@ -217,7 +300,7 @@ const useProjects = () => {
       const data = await fetchJson(`${baseUrl}/projects/formatted/${id}`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         }
       });
       return data;
@@ -241,7 +324,7 @@ const useProjects = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(updatedData)
       });
@@ -267,7 +350,7 @@ const useProjects = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(updatedData)
       });
@@ -294,7 +377,7 @@ const useProjects = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(projects)
       });
@@ -320,8 +403,11 @@ const useProjects = () => {
     getProjectsSimple,
     getProjectCount,
     getProject,
+    getProjectsBySearch,
     getProjectSimpleById,
     updateProjectInList,
+    postProjectFavorite,
+    deleteProjectFavorite,
     getStatuses,
     getProjectFormatted,
     updateProject,
@@ -343,7 +429,7 @@ const useBuildingUses = () => {
       const data = await fetchJson(`${baseUrl}/building-uses`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         }
       });
       setBuildingUses(data);
@@ -378,7 +464,7 @@ const useBuildingTypes = () => {
       const data = await fetchJson(`${baseUrl}/building-types`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         }
       });
       setBuildingTypes(data);
@@ -413,7 +499,7 @@ const useCities = () => {
       const data = await fetchJson(`${baseUrl}/cities`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         }
       });
       setCities(data);
@@ -448,7 +534,7 @@ const useCountries = () => {
       const data = await fetchJson(`${baseUrl}/countries`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         }
       });
       setCountries(data);
@@ -483,7 +569,7 @@ const useMetroAreas = () => {
       const data = await fetchJson(`${baseUrl}/metro-areas`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         }
       });
       setMetroAreas(data);
@@ -506,7 +592,7 @@ const useMetroAreas = () => {
       const data = await fetchJson(`${baseUrl}/metro-areas/${id}`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         }
       });
       return data;
@@ -530,7 +616,7 @@ const useMetroAreas = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ name, countryId })
       });
@@ -558,7 +644,7 @@ const useMetroAreas = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(updatedData)
       });
@@ -633,7 +719,7 @@ const useEnrichment = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+            Authorization: `Bearer ${token}`
           }
         }
       );

@@ -20,6 +20,10 @@ import type { Country } from '../interfaces/Country';
 import type { BuildingType } from '../interfaces/BuildinType';
 import type { Project } from '../interfaces/Project';
 
+import { AppContext } from '../contexts/AppContext';
+import favoritedIcon from '../assets/star-symbol-icon.png';
+import checkedIcon from '../assets/check-mark-icon.png';
+import unfavoritedIcon from '../assets/star.png';
 const Table = styled.table`
   max-width: 100%;
   border-collapse: collapse;
@@ -58,8 +62,11 @@ const ProjectTable = () => {
     getStatuses,
     projectCount,
     getProjectCount,
+    getProjectsBySearch,
     updateProjectInList,
-    getProjectFormatted
+    getProjectFormatted,
+    postProjectFavorite,
+    deleteProjectFavorite
   } = useProjects();
   const { cities, getCities } = useCities();
   const { countries, getCountries } = useCountries();
@@ -89,7 +96,7 @@ const ProjectTable = () => {
     lastDate: ''
   });
   const [filterDraft, setFilterDraft] = React.useState(filters);
-
+  const [searchTerm, setSearchTerm] = useState('');
   const [sortKey, setSortKey] = useState('id');
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   const [page, setPage] = useState(1);
@@ -97,12 +104,35 @@ const ProjectTable = () => {
   const [pageCount, setPageCount] = useState(1);
   const [restored, setRestored] = useState(false);
 
+  const { user } = React.useContext(AppContext);
+  const storedUser = React.useMemo(() => {
+    try {
+      const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      console.log(savedUser);
+      return savedUser;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const userId = (user ?? storedUser)?.user.id;
+
+  const isFavoritedByCurrentUser = (project: Project) => {
+    if (!userId) return false;
+    if (!project.favoritedByUsers?.length) return false;
+    return project.favoritedByUsers.some(
+      (favoritedUser) =>
+        favoritedUser.id !== null && favoritedUser.id === userId
+    );
+  };
+
   const calculatePageCount = (totalCount: number, pageSize: number) => {
     return Math.ceil(totalCount / pageSize);
   };
 
   const handleEdit = async (projectId: number) => {
     const fullProject = await getProjectFormatted(projectId);
+    console.log(fullProject);
     setSelectedProject(fullProject);
     setIsModalOpen('info');
   };
@@ -175,6 +205,23 @@ const ProjectTable = () => {
   // }
   return (
     <div style={{ maxWidth: '100%' }}>
+      <div>
+        <input
+          type="text"
+          placeholder="Search projects..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button
+          onClick={() => {
+            getProjectsBySearch(searchTerm);
+
+            getProjectCount(searchTerm);
+          }}
+        >
+          Search
+        </button>
+      </div>
       <div>
         <label>Sort by:</label>
         <select onChange={(e) => setSortKey(e.target.value)}>
@@ -458,18 +505,48 @@ const ProjectTable = () => {
             <tr key={project.id}>
               {project.checkedBy ? (
                 <TD>
-                  <img src="../assets/check-mark-icon.png" alt="Checked" />
+                  <img height={'64px'} src={checkedIcon} alt="Checked" />
                 </TD>
               ) : (
                 <TD></TD>
               )}
-              {project.favoritedByUsers &&
-              project.favoritedByUsers.length > 0 ? (
+              {isFavoritedByCurrentUser(project) ? (
                 <TD>
-                  <img src="../assets/star-symbol-icon.png" alt="Favorited" />
+                  <button
+                    onClick={() => {
+                      deleteProjectFavorite(project.id as number);
+                      updateProjectInList({
+                        ...project,
+                        favoritedByUsers: (
+                          project.favoritedByUsers || []
+                        ).filter((u) => u.id !== userId)
+                      });
+                    }}
+                  >
+                    <img height={'64px'} src={favoritedIcon} alt="Favorited" />
+                  </button>
                 </TD>
               ) : (
-                <TD></TD>
+                <TD>
+                  <button
+                    onClick={() => {
+                      postProjectFavorite(project.id as number);
+                      updateProjectInList({
+                        ...project,
+                        favoritedByUsers: [
+                          ...(project.favoritedByUsers || []),
+                          { id: userId, username: '' }
+                        ]
+                      });
+                    }}
+                  >
+                    <img
+                      height={'64px'}
+                      src={unfavoritedIcon}
+                      alt="Not Favorited"
+                    />
+                  </button>
+                </TD>
               )}
 
               <TD>{project.id}</TD>
@@ -537,10 +614,12 @@ const ProjectTable = () => {
           selectedProject={selectedProject}
           onClose={() => setIsModalOpen(null)}
           metroAreas={metroAreas as unknown as MetroArea[] | []}
+          userId={userId}
           onProjectUpdate={(updatedProject) => {
             updateProjectInList(updatedProject);
-            setSelectedProject(updatedProject);
-            setIsModalOpen(null);
+            setSelectedProject((prev) =>
+              prev ? { ...prev, ...updatedProject } : updatedProject
+            );
           }}
         />
       )}

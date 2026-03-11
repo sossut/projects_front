@@ -19,7 +19,7 @@ const LoginForm: React.FC = () => {
       const user = await login(email, password);
       if (user) {
         console.log('User logged in:', user);
-        localStorage.setItem('token', user.token);
+
         setUser(user);
         navigate('/');
       }

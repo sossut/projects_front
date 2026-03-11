@@ -33,8 +33,9 @@ export interface Project {
   budgetEur?: number;
   glassFacade?: 'yes' | 'no' | 'unknown' | true | false | 0 | 1 | null | 'null';
   facadeBasis?: string;
-  checkedBy?: number;
-  checkedAt?: Date;
+  checkedBy?: number | null;
+  checkedAt?: Date | null;
+  checkedByUsername?: string | null;
   favorited?: boolean;
   favoritedByUsers?: {
     id: number;
