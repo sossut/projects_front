@@ -152,7 +152,8 @@ const MetroAreaJsonCopyModal: React.FC<MetroAreaJsonCopyModalProps> = ({
                             "title": "",
                             "url": "",
                             "sourcePage": "",
-                            "mediaType": ""
+                            "mediaType": "",
+                            "mediaDate": "YYYY-MM-DD"
                           }
                         ],
                         "sources": [

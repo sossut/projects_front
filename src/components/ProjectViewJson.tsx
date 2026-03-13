@@ -16,8 +16,9 @@ const ProjectViewJson: React.FC<ProjectViewJsonProps> = ({ id }) => {
   const instructions = `\n\n---\nInstructions:\n1. Enrich and find more data for this json 
   \n2. Review all fields for accuracy.\n3. Dont make up new fields.\n
   4. Media  urls should be direct links to media files, not source pages, ending with .jpg .webp, .png \n
-  5. Here is the json schema with enum fields:\n
-  6. Add Contacts to the respective arrays (developers, architects, contractors, consultants) with as much info as possible. \n
+  5.  Try to find the date for the media and add it as mediaDate. Meaning when the image was taken.\n
+  6. Here is the json schema with enum fields:\n
+  7. Add Contacts to the respective arrays (developers, architects, contractors, consultants) with as much info as possible. \n
   
     {
       "id": "",
@@ -89,7 +90,8 @@ const ProjectViewJson: React.FC<ProjectViewJsonProps> = ({ id }) => {
           "title": "",
           "url": "",
           "sourcePage": "",
-          "mediaType": ""
+          "mediaType": "",
+          "mediaDate": "YYYY-MM-DD",
         }
       ],
       "sources": [

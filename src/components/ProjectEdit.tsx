@@ -223,6 +223,28 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
                   }}
                   placeholder="Source Page"
                 />
+                <input
+                  type="date"
+                  value={
+                    media.mediaDate
+                      ? media.mediaDate.toDateString().split('T')[0]
+                      : ''
+                  }
+                  onChange={(e) => {
+                    const newMedias = [...(formData.media || [])];
+                    newMedias[idx] = {
+                      ...media,
+                      mediaDate: e.target.value.toString()
+                        ? new Date(e.target.value)
+                        : null
+                    };
+                    setFormData((prev) => ({
+                      ...prev,
+                      media: newMedias
+                    }));
+                  }}
+                  placeholder="Media Date"
+                />
                 <button
                   type="button"
                   style={{ color: 'red' }}
@@ -256,7 +278,8 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
                     mediaType: '',
                     filename: '',
                     sourcePage: '',
-                    projectId: project.id as number // <-- add this line
+                    projectId: project.id as number, // <-- add this line
+                    mediaDate: null
                   }
                 ]
               }));

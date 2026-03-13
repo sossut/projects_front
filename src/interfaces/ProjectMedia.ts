@@ -8,4 +8,6 @@ export interface ProjectMedia {
   filename?: string;
   sourcePage?: string | null;
   mediaType?: string | null;
+  createdAt?: Date;
+  mediaDate?: Date | null;
 }
