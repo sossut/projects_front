@@ -223,6 +223,7 @@ const MetroAreasForAutoUpdates: React.FC = () => {
       {isModalOpen === 'copyJson' && selectedArea && (
         <MetroAreaJsonCopyModal
           metroAreaName={selectedArea.name || ''}
+          metroAreaId={selectedArea.id}
           onClose={() => {
             setIsModalOpen(false);
             setSelectedArea(null);

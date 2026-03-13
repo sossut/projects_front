@@ -31,6 +31,7 @@ const useProjects = () => {
   const [error, setError] = useState<string | null>(null);
   const [statuses, setStatuses] = useState<string[]>([]);
   const [projectCount, setProjectCount] = useState<number>(0);
+  const [projectNames, setProjectNames] = useState<string[]>([]);
 
   const getProjects = async () => {
     setLoading(true);
@@ -162,6 +163,37 @@ const useProjects = () => {
       });
       console.log(`${baseUrl}/projects/count?${filters}`);
       setProjectCount(response.count);
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getProjectNamesByMetroAreaAndBuildingType = async (
+    metroAreaId: number,
+    buildingTypeId: number
+  ) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(
+        `getProjectNamesByMetroAreaAndBuildingType: metroAreaId=${metroAreaId}, buildingTypeId=${buildingTypeId}`
+      );
+      const data = await fetchJson(
+        `${baseUrl}/projects/metro/${metroAreaId}/building-type/${buildingTypeId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setProjectNames(data);
     } catch (e) {
       if (e instanceof Error) {
         setError(e.message);
@@ -399,10 +431,12 @@ const useProjects = () => {
     error,
     statuses,
     projectCount,
+    projectNames,
     getProjects,
     getProjectsSimple,
     getProjectCount,
     getProject,
+    getProjectNamesByMetroAreaAndBuildingType,
     getProjectsBySearch,
     getProjectSimpleById,
     updateProjectInList,

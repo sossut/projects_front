@@ -1,15 +1,24 @@
 import React from 'react';
-
+import { useProjects } from '../hooks/ApiHooks';
 interface MetroAreaJsonCopyModalProps {
   metroAreaName: string;
+  metroAreaId: number;
   onClose: () => void;
 }
 
 const MetroAreaJsonCopyModal: React.FC<MetroAreaJsonCopyModalProps> = ({
   metroAreaName,
+  metroAreaId,
   onClose
 }) => {
   const [buildingType, setBuildingType] = React.useState('');
+  const [buildingTypeId, setBuildingTypeId] = React.useState<number | null>(
+    null
+  );
+
+  const { projectNames, getProjectNamesByMetroAreaAndBuildingType } =
+    useProjects();
+
   const copyToClipboard = () => {
     const text = `BUILDING PROJECT RESEARCH — JSON-ONLY OUTPUT (STRICT)
 
@@ -79,6 +88,9 @@ const MetroAreaJsonCopyModal: React.FC<MetroAreaJsonCopyModalProps> = ({
                   Medium — Confirmed by one reliable recent source or multiple secondary sources.
                   Low — Limited confirmation, older sources, or unresolved discrepancies.
 
+                  Here is the names of all projects in the database matching the criteria, to avoid duplicates (if any):
+
+                  ${projectNames.join(',\n ')}
 
 
                   JSON SCHEMA TEMPLATE (MUST MATCH) IN JSON CODE FORMAT json code block.
@@ -180,6 +192,16 @@ const MetroAreaJsonCopyModal: React.FC<MetroAreaJsonCopyModalProps> = ({
     onClose();
   };
 
+  const handleNames = async (buildingTypeId: number) => {
+    if (metroAreaId && buildingTypeId) {
+      const pn = await getProjectNamesByMetroAreaAndBuildingType(
+        metroAreaId,
+        buildingTypeId
+      );
+      console.log(pn);
+    }
+  };
+
   return (
     <div
       style={{
@@ -215,15 +237,33 @@ const MetroAreaJsonCopyModal: React.FC<MetroAreaJsonCopyModalProps> = ({
           Building Type:
           <select
             value={buildingType}
-            onChange={(e) => setBuildingType(e.target.value)}
+            onChange={(e) => {
+              const selectedBuildingType = e.target.value;
+              const selectedTypeId = e.target.selectedOptions[0]?.dataset.btId;
+
+              setBuildingType(selectedBuildingType);
+              setBuildingTypeId(
+                selectedTypeId ? parseInt(selectedTypeId, 10) : null
+              );
+              handleNames(buildingTypeId as number);
+            }}
           >
             <option value="">Select building type</option>
-            <option value="A">Skyscraper (over 150 m)</option>
-            <option value="B">High-rise (50–150 m)</option>
-            <option value="C">Major civic or commercial building</option>
-            <option value="D">Industrial building</option>
+            <option data-bt-id="1" value="A">
+              Skyscraper (over 150 m)
+            </option>
+            <option data-bt-id="2" value="B">
+              High-rise (50–150 m)
+            </option>
+            <option data-bt-id="3" value="C">
+              Major civic or commercial building
+            </option>
+            <option data-bt-id="4" value="D">
+              Industrial building
+            </option>
           </select>
         </label>
+
         <button onClick={copyToClipboard}>Copy JSON Template</button>
       </div>
     </div>
