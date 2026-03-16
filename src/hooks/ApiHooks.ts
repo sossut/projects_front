@@ -4,7 +4,20 @@ import type { MetroArea } from '../interfaces/MetroArea';
 import type { Country } from '../interfaces/Country';
 
 const baseUrl = 'http://localhost:5000/api/v1';
-const token = JSON.parse(localStorage.getItem('user') || '{}')?.token || '';
+const getAuthToken = () => {
+  try {
+    const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+    return storedUser?.token || storedUser?.user?.token || '';
+  } catch {
+    return '';
+  }
+};
+
+const token = {
+  toString: () => getAuthToken(),
+  valueOf: () => getAuthToken(),
+  [Symbol.toPrimitive]: () => getAuthToken()
+} as unknown as string;
 
 const fetchJson = async (url: string, options = {}) => {
   try {
@@ -825,7 +838,7 @@ const useQueue = () => {
       const data = await fetchJson(`${baseUrl}/queue-info`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          Authorization: `Bearer ${getAuthToken()}`
         }
       });
       setQueueInfo(data);

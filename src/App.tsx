@@ -1,5 +1,5 @@
 import './App.css';
-import { Route, Routes, BrowserRouter } from 'react-router-dom';
+import { Route, Routes, BrowserRouter, HashRouter } from 'react-router-dom';
 import { AppProvider } from './contexts/AppContext';
 import Home from './views/Home';
 import NavBar from './components/NavBar';
@@ -8,8 +8,11 @@ import Else from './views/Else';
 import Login from './views/Login';
 
 function App() {
+  const Router =
+    window.location.protocol === 'file:' ? HashRouter : BrowserRouter;
+
   return (
-    <BrowserRouter>
+    <Router>
       <AppProvider>
         <NavBar />
         <Routes>
@@ -20,7 +23,7 @@ function App() {
           <Route path="/profile" element={<Else />} />
         </Routes>
       </AppProvider>
-    </BrowserRouter>
+    </Router>
   );
 }
 

@@ -118,7 +118,8 @@ const ProjectTable = () => {
     }
   }, []);
 
-  const userId = (user ?? storedUser)?.user.id;
+  const resolvedUser = user ?? storedUser?.user ?? storedUser;
+  const userId = resolvedUser?.id;
 
   const isFavoritedByCurrentUser = (project: Project) => {
     if (!userId) return false;
