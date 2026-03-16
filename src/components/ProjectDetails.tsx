@@ -7,7 +7,7 @@ import type { Consultant } from '../interfaces/Consultant';
 import type { Contractor } from '../interfaces/Contractor';
 import { useProjects } from '../hooks/ApiHooks';
 import unFavoritedIcon from '../assets/star.png';
-import checkedIcon from '../assets/check-mark-icon.png';
+
 import favoritedIcon from '../assets/star-symbol-icon.png';
 
 const LabelTD = styled.td`
@@ -233,12 +233,36 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
           <div style={{ padding: '4px 8px' }}>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               {project?.media?.map((media) => (
-                <img
+                <div
                   key={media.id}
-                  src={media.url}
-                  alt={media.title || 'Project'}
-                  style={{ height: 280, borderRadius: 4 }}
-                />
+                  style={{
+                    cursor: 'pointer',
+                    position: 'relative',
+                    borderRadius: 4
+                  }}
+                >
+                  {media.mediaDate && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        background: 'rgba(0,0,0,0.7)',
+                        color: '#fff',
+                        padding: '2px 4px',
+                        borderRadius: 4
+                      }}
+                    >
+                      {new Date(media.mediaDate).toLocaleDateString()}
+                    </div>
+                  )}
+                  <img
+                    key={media.id}
+                    src={media.url}
+                    alt={media.title || 'Project'}
+                    style={{ height: 280, borderRadius: 4 }}
+                  />
+                </div>
               ))}
             </div>
           </div>

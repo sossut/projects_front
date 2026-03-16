@@ -75,6 +75,9 @@ const ProjectTable = () => {
   const { buildingTypes, getBuildingTypes } = useBuildingTypes();
 
   const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
+  const [selectedImageDate, setSelectedImageDate] = React.useState<
+    string | null
+  >(null);
   const [selectedProject, setSelectedProject] = React.useState<Project | null>(
     null
   );
@@ -585,6 +588,9 @@ const ProjectTable = () => {
                     }}
                     onClick={() => {
                       setSelectedImage(media.url);
+                      setSelectedImageDate(
+                        (media.mediaDate as string | undefined) || null
+                      );
                       setIsModalOpen('image');
                     }}
                   />
@@ -606,6 +612,7 @@ const ProjectTable = () => {
       {isModalOpen === 'image' && selectedImage && (
         <ProjectImageModal
           imageUrl={selectedImage}
+          mediaDate={selectedImageDate ?? undefined}
           onClose={() => setIsModalOpen(null)}
         />
       )}

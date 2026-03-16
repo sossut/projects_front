@@ -77,7 +77,17 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
       onClose();
     }
   };
-
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
   return (
     <ModalBackground>
       <Modal onClick={(e) => e.stopPropagation()}>
