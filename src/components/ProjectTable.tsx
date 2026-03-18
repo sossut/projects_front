@@ -118,15 +118,22 @@ const ProjectTable = () => {
     }
   }, []);
 
-  const resolvedUser = user ?? storedUser?.user ?? storedUser;
-  const userId = resolvedUser?.id;
+  const resolvedUser =
+    (user as unknown as { user?: { id?: number } })?.user ??
+    user ??
+    storedUser?.user ??
+    storedUser;
+  const userId =
+    typeof resolvedUser?.id === 'number'
+      ? resolvedUser.id
+      : Number(resolvedUser?.id) || undefined;
 
   const isFavoritedByCurrentUser = (project: Project) => {
     if (!userId) return false;
     if (!project.favoritedByUsers?.length) return false;
     return project.favoritedByUsers.some(
       (favoritedUser) =>
-        favoritedUser.id !== null && favoritedUser.id === userId
+        favoritedUser.id !== null && Number(favoritedUser.id) === Number(userId)
     );
   };
 

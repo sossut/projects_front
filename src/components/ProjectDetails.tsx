@@ -49,8 +49,16 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
 }) => {
   const { postProjectFavorite, deleteProjectFavorite, updateProject } =
     useProjects();
+  const storedUser = React.useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || 'null');
+    } catch {
+      return null;
+    }
+  }, []);
+
   const username =
-    JSON.parse(localStorage.getItem('user') || 'null')?.user?.username || '';
+    storedUser?.user?.username || storedUser?.username || '';
   const isFavoritedByCurrentUser = React.useMemo(() => {
     if (typeof project?.favorited === 'boolean') {
       return project.favorited;
@@ -62,7 +70,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
 
     return project.favoritedByUsers.some(
       (favoritedUser) =>
-        favoritedUser.id !== null && favoritedUser.id === userId
+        favoritedUser.id !== null && Number(favoritedUser.id) === Number(userId)
     );
   }, [project?.favorited, project?.favoritedByUsers, userId]);
   const [checkedAt, setCheckedAt] = React.useState<string | Date | null>(
@@ -96,7 +104,8 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
       favoritedByUsers: [
         ...(project.favoritedByUsers?.filter(
           (favoritedUser) =>
-            favoritedUser.id !== null && favoritedUser.id !== userId
+            favoritedUser.id !== null &&
+            Number(favoritedUser.id) !== Number(userId)
         ) || []),
         { id: userId, username: username }
       ]
@@ -114,7 +123,8 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
       favoritedByUsers:
         project.favoritedByUsers?.filter(
           (favoritedUser) =>
-            favoritedUser.id !== null && favoritedUser.id !== userId
+            favoritedUser.id !== null &&
+            Number(favoritedUser.id) !== Number(userId)
         ) || []
     });
   };
