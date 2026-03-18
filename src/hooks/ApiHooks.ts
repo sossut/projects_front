@@ -4,7 +4,7 @@ import type { MetroArea } from '../interfaces/MetroArea';
 import type { Country } from '../interfaces/Country';
 
 const baseUrl =
-  'https://oaks-questionnaire-undertaken-college.trycloudflare.com';
+  'https://essentials-housing-transaction-ecommerce.trycloudflare.com/api/v1';
 const getAuthToken = () => {
   try {
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
