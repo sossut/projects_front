@@ -3,7 +3,8 @@ import type { Project } from '../interfaces/Project';
 import type { MetroArea } from '../interfaces/MetroArea';
 import type { Country } from '../interfaces/Country';
 
-const baseUrl = 'http://localhost:5000/api/v1';
+const baseUrl =
+  'https://taxation-experts-consumers-collar.trycloudflare.com/api/v1';
 const getAuthToken = () => {
   try {
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
