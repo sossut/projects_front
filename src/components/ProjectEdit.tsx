@@ -227,7 +227,16 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
                   type="date"
                   value={
                     media.mediaDate
-                      ? media.mediaDate.toDateString().split('T')[0]
+                      ? (() => {
+                          const parsedDate =
+                            media.mediaDate instanceof Date
+                              ? media.mediaDate
+                              : new Date(media.mediaDate);
+
+                          return Number.isNaN(parsedDate.getTime())
+                            ? ''
+                            : parsedDate.toISOString().split('T')[0];
+                        })()
                       : ''
                   }
                   onChange={(e) => {
