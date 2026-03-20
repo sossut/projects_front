@@ -57,8 +57,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
     }
   }, []);
 
-  const username =
-    storedUser?.user?.username || storedUser?.username || '';
+  const username = storedUser?.user?.username || storedUser?.username || '';
   const isFavoritedByCurrentUser = React.useMemo(() => {
     if (typeof project?.favorited === 'boolean') {
       return project.favorited;
@@ -467,28 +466,6 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                         <div>
                           <strong>{consultant.name}</strong>
                         </div>
-                        {consultant.email && (
-                          <div>
-                            Email:{' '}
-                            <a
-                              href={`mailto:${consultant.contact?.email}`}
-                              style={{ color: '#4af' }}
-                            >
-                              {consultant.contact?.email}
-                            </a>
-                          </div>
-                        )}
-                        {consultant.phone && (
-                          <div>
-                            Phone:{' '}
-                            <a
-                              href={`tel:${consultant.contact?.phone}`}
-                              style={{ color: '#4af' }}
-                            >
-                              {consultant.contact?.phone}
-                            </a>
-                          </div>
-                        )}
                         {consultant.website && (
                           <div>
                             Website:{' '}
@@ -499,6 +476,28 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                               style={{ color: '#4af' }}
                             >
                               {consultant.website}
+                            </a>
+                          </div>
+                        )}
+                        {consultant.contact?.email && (
+                          <div>
+                            Email:{' '}
+                            <a
+                              href={`mailto:${consultant.contact?.email}`}
+                              style={{ color: '#4af' }}
+                            >
+                              {consultant.contact?.email}
+                            </a>
+                          </div>
+                        )}
+                        {consultant.contact?.phone && (
+                          <div>
+                            Phone:{' '}
+                            <a
+                              href={`tel:${consultant.contact?.phone}`}
+                              style={{ color: '#4af' }}
+                            >
+                              {consultant.contact?.phone}
                             </a>
                           </div>
                         )}
@@ -520,7 +519,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                         <div>
                           <strong>{contractor.name}</strong>
                         </div>
-                        {contractor.email && (
+                        {contractor.contact?.email && (
                           <div>
                             Email:{' '}
                             <a
@@ -531,7 +530,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                             </a>
                           </div>
                         )}
-                        {contractor.phone && (
+                        {contractor.contact?.phone && (
                           <div>
                             Phone:{' '}
                             <a
