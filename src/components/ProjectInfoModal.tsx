@@ -15,6 +15,8 @@ interface ProjectInfoModalProps {
   metroAreas?: MetroArea[] | [];
   onProjectUpdate: (updatedProject: Project) => void;
   userId?: number;
+  goPrevious?: () => void;
+  goNext?: () => void;
 }
 
 const ModalBackground = styled.div`
@@ -52,7 +54,9 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
   onClose,
   metroAreas,
   onProjectUpdate,
-  userId
+  userId,
+  goPrevious,
+  goNext
 }) => {
   const [view, setView] = React.useState<'details' | 'edit' | 'json'>(
     'details'
@@ -90,6 +94,32 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
   }, [onClose]);
   return (
     <ModalBackground>
+      <div>
+        <button
+          style={{
+            position: 'fixed',
+            left: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 1001
+          }}
+          onClick={goPrevious}
+        >
+          {'\u2190' /* Left arrow symbol */}
+        </button>
+        <button
+          style={{
+            position: 'fixed',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 1001
+          }}
+          onClick={goNext}
+        >
+          {'\u2192' /* Right arrow symbol */}
+        </button>
+      </div>
       <Modal onClick={(e) => e.stopPropagation()}>
         <ModalContent>
           <div

@@ -215,6 +215,23 @@ const ProjectTable = () => {
   // if (!projects || projects.length === 0) {
   //   return <p>No data available</p>;
   // }
+  const goPreviousProject = () => {
+    if (!selectedProject) return;
+    const currentIndex = projects.findIndex((p) => p.id === selectedProject.id);
+    if (currentIndex > 0) {
+      const previousProject = projects[currentIndex - 1];
+      setSelectedProject(previousProject);
+    }
+  };
+
+  const goNextProject = () => {
+    if (!selectedProject) return;
+    const currentIndex = projects.findIndex((p) => p.id === selectedProject.id);
+    if (currentIndex < projects.length - 1) {
+      const nextProject = projects[currentIndex + 1];
+      setSelectedProject(nextProject);
+    }
+  };
   return (
     <div style={{ maxWidth: '100%' }}>
       <div>
@@ -654,6 +671,8 @@ const ProjectTable = () => {
               prev ? { ...prev, ...updatedProject } : updatedProject
             );
           }}
+          goPrevious={goPreviousProject}
+          goNext={goNextProject}
         />
       )}
       <div>
