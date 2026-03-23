@@ -62,6 +62,7 @@ const ProjectTable = () => {
     getStatuses,
     projectCount,
     getProjectCount,
+    getFavoritedProjects,
     getProjectsBySearch,
     updateProjectInList,
     getProjectFormatted,
@@ -216,6 +217,23 @@ const ProjectTable = () => {
   // }
   return (
     <div style={{ maxWidth: '100%' }}>
+      <div>
+        <button
+          onClick={() => {
+            getProjectsSimple(serializeFilters(), sortKey, order, pageSize, 1);
+            getProjectCount(serializeFilters());
+          }}
+        >
+          All Projects
+        </button>
+        <button
+          onClick={() => {
+            getFavoritedProjects();
+          }}
+        >
+          Favorited Projects
+        </button>
+      </div>
       <div>
         <input
           type="text"

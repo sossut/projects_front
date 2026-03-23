@@ -141,6 +141,30 @@ const useProjects = () => {
     );
   };
 
+  const getFavoritedProjects = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log('getFavoritedProjects');
+      const data = await fetchJson(`${baseUrl}/projects/favorites`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setProjects(data);
+      setProjectCount(data.length);
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getProjectSimpleById = async (id: number) => {
     setLoading(true);
     setError(null);
@@ -453,6 +477,7 @@ const useProjects = () => {
     getProjectNamesByMetroAreaAndBuildingType,
     getProjectsBySearch,
     getProjectSimpleById,
+    getFavoritedProjects,
     updateProjectInList,
     postProjectFavorite,
     deleteProjectFavorite,
