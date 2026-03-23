@@ -5,6 +5,8 @@ import { useProjects } from '../hooks/ApiHooks';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import ProjectInfoModal from './ProjectInfoModal';
+import type { Project } from '../interfaces/Project';
 
 const defaultMarkerIcon = L.icon({
   iconRetinaUrl: markerIcon2x,
@@ -17,11 +19,19 @@ const defaultMarkerIcon = L.icon({
 });
 
 const MapDiv: React.FC = () => {
-  const { projects, getProjectsCoordinates } = useProjects();
+  const { projects, getProjectsCoordinates, getProjectFormatted } =
+    useProjects();
+  const [selectedProject, setSelectedProject] = React.useState<Project | null>(
+    null
+  );
   React.useEffect(() => {
     getProjectsCoordinates();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const openModalForProject = async (projectId: number) => {
+    const p = await getProjectFormatted(projectId);
+    setSelectedProject(p);
+  };
   return (
     <div style={{ width: '100%', height: '70vh' }}>
       <MapContainer
@@ -49,10 +59,31 @@ const MapDiv: React.FC = () => {
                   {project.name ? project.name : 'Unnamed Project'}
                 </strong>
                 <br />
+                <button
+                  onClick={() => openModalForProject(project.id as number)}
+                  style={{
+                    marginTop: '5px',
+                    padding: '5px 10px',
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  View Details
+                </button>
               </Popup>
             </Marker>
           ))}
       </MapContainer>
+      {selectedProject && (
+        <ProjectInfoModal
+          selectedProject={selectedProject}
+          onClose={() => setSelectedProject(null)}
+          onProjectUpdate={() => {}}
+        />
+      )}
     </div>
   );
 };
