@@ -6,6 +6,7 @@ import NavBar from './components/NavBar';
 import Updates from './views/Updates';
 import Else from './views/Else';
 import Login from './views/Login';
+import Map from './views/Map';
 
 function App() {
   const Router =
@@ -21,6 +22,7 @@ function App() {
           <Route path="/else" element={<Else />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<Else />} />
+          <Route path="/map" element={<Map />} />
         </Routes>
       </AppProvider>
     </Router>

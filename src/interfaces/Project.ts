@@ -54,6 +54,8 @@ export interface Project {
   isActive?: boolean;
   projectKey?: string; //lower(trim(name)) + "|" + lower(trim(city)) + "|" + lower(trim(country))
   location?: {
+    latitude: number;
+    longitude: number;
     continent: string;
     address: string;
     country: string;

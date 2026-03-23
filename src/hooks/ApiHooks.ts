@@ -385,6 +385,30 @@ const useProjects = () => {
     }
   };
 
+  const getProjectsCoordinates = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log('getProjectsCoordinates');
+      const data = await fetchJson(`${baseUrl}/projects/coordinates`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setProjects(data);
+      return data;
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updateProject = async (id: number, updatedData: Partial<Project>) => {
     setLoading(true);
     setError(null);
@@ -477,6 +501,7 @@ const useProjects = () => {
     getProjectNamesByMetroAreaAndBuildingType,
     getProjectsBySearch,
     getProjectSimpleById,
+    getProjectsCoordinates,
     getFavoritedProjects,
     updateProjectInList,
     postProjectFavorite,
