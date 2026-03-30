@@ -232,6 +232,7 @@ const useProjects = () => {
         }
       );
       setProjectNames(data);
+      return data;
     } catch (e) {
       if (e instanceof Error) {
         setError(e.message);

@@ -240,12 +240,16 @@ const MetroAreaJsonCopyModal: React.FC<MetroAreaJsonCopyModalProps> = ({
             onChange={(e) => {
               const selectedBuildingType = e.target.value;
               const selectedTypeId = e.target.selectedOptions[0]?.dataset.btId;
+              const parsedTypeId = selectedTypeId
+                ? parseInt(selectedTypeId, 10)
+                : null;
 
               setBuildingType(selectedBuildingType);
-              setBuildingTypeId(
-                selectedTypeId ? parseInt(selectedTypeId, 10) : null
-              );
-              handleNames(buildingTypeId as number);
+              setBuildingTypeId(parsedTypeId);
+              console.log('change');
+              if (parsedTypeId) {
+                handleNames(parsedTypeId);
+              }
             }}
           >
             <option value="">Select building type</option>
