@@ -204,7 +204,14 @@ const ProjectTable = () => {
       setRestored(true);
     }
   }, []);
-
+  const handleSearchKeyDown = async (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (event.key === 'Enter') {
+      await getProjectsBySearch(searchTerm);
+      await getProjectCount(searchTerm);
+    }
+  };
   React.useEffect(() => {
     if (restored) {
       getProjectsSimple(serializeFilters(), sortKey, order, pageSize, 1);
@@ -215,21 +222,25 @@ const ProjectTable = () => {
   // if (!projects || projects.length === 0) {
   //   return <p>No data available</p>;
   // }
-  const goPreviousProject = () => {
+  const goPreviousProject = async () => {
     if (!selectedProject) return;
     const currentIndex = projects.findIndex((p) => p.id === selectedProject.id);
     if (currentIndex > 0) {
       const previousProject = projects[currentIndex - 1];
-      setSelectedProject(previousProject);
+      const fullProject = await getProjectFormatted(
+        previousProject.id as number
+      );
+      setSelectedProject(fullProject);
     }
   };
 
-  const goNextProject = () => {
+  const goNextProject = async () => {
     if (!selectedProject) return;
     const currentIndex = projects.findIndex((p) => p.id === selectedProject.id);
     if (currentIndex < projects.length - 1) {
       const nextProject = projects[currentIndex + 1];
-      setSelectedProject(nextProject);
+      const fullProject = await getProjectFormatted(nextProject.id as number);
+      setSelectedProject(fullProject);
     }
   };
   return (
@@ -257,6 +268,7 @@ const ProjectTable = () => {
           placeholder="Search projects..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleSearchKeyDown}
         />
         <button
           onClick={() => {

@@ -33,7 +33,7 @@ const MapDiv: React.FC = () => {
     setSelectedProject(p);
   };
   return (
-    <div style={{ width: '100%', height: '70vh' }}>
+    <div style={{ width: '100%', height: '80vh' }}>
       <MapContainer
         center={[30, -0.09]}
         zoom={3}
