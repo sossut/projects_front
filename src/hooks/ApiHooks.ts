@@ -488,6 +488,29 @@ const useProjects = () => {
     }
   };
 
+  const deleteProject = async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`deleteProject: ${id}`);
+      await fetchJson(`${baseUrl}/projects/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     projects,
     loading,
@@ -511,7 +534,8 @@ const useProjects = () => {
     getProjectFormatted,
     updateProject,
     updateProjectNoId,
-    addProjects
+    addProjects,
+    deleteProject
   };
 };
 

@@ -10,6 +10,7 @@ import type { Consultant } from '../interfaces/Consultant';
 import ContactEditModal from './ContactEditModal';
 import type { MetroArea } from '../interfaces/MetroArea';
 import type { ProjectWebsite } from '../interfaces/ProjectWebsite';
+import { AppContext } from '../contexts/AppContext';
 
 const EditContainer = styled.div`
   padding: 20px;
@@ -31,6 +32,29 @@ const FormGroup = styled.div`
   }
 `;
 
+const DeleteModalBackdrop = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+`;
+
+const DeleteModalContent = styled.div`
+  background: #fff;
+  color: #111;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 320px;
+  max-width: 420px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+`;
+
 interface ProjectEditProps {
   project: Project;
   onClose: () => void;
@@ -44,8 +68,9 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
   metroAreas,
   onProjectUpdate
 }) => {
+  const { user } = React.useContext(AppContext);
   const { buildingUses, getBuildingUses } = useBuildingUses();
-  const { updateProject, getProjectSimpleById } = useProjects();
+  const { updateProject, getProjectSimpleById, deleteProject } = useProjects();
   const [formData, setFormData] = React.useState<Project>({
     ...project,
     consultants: (project.consultants || []).filter(
@@ -73,6 +98,8 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
   });
   const [removals, setRemovals] = React.useState<Record<string, number[]>>({});
   const [isConctactModalOpen, setIsContactModalOpen] = React.useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = React.useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = React.useState('');
   const [editingOperator, setEditingOperator] = React.useState<{
     type: 'consultant' | 'architect' | 'contractor' | 'developer';
     index: number;
@@ -109,6 +136,17 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
       ...prev,
       [field]: [...(prev[field] ?? []), id]
     }));
+  };
+
+  const handleDeleteProject = async () => {
+    if (deleteConfirmText === 'DELETE') {
+      await deleteProject(project.id as number);
+      onClose();
+      setIsDeleteConfirmOpen(false);
+      setDeleteConfirmText('');
+    } else {
+      alert('Please type DELETE to confirm project deletion.');
+    }
   };
 
   const handleSubmit = async (e: React.SubmitEvent) => {
@@ -758,6 +796,15 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
         <button type="button" onClick={onClose}>
           Cancel
         </button>
+        {user?.role === 'admin' && (
+          <button
+            onClick={() => setIsDeleteConfirmOpen(true)}
+            type="button"
+            style={{ color: 'red' }}
+          >
+            Delete Project
+          </button>
+        )}
       </form>
       {isConctactModalOpen && editingOperator && (
         <ContactEditModal
@@ -803,6 +850,33 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
           }}
           editMode="add"
         />
+      )}
+      {isDeleteConfirmOpen && (
+        <DeleteModalBackdrop onClick={() => setIsDeleteConfirmOpen(false)}>
+          <DeleteModalContent onClick={(e) => e.stopPropagation()}>
+            <p>Are you sure you want to delete this project?</p>
+            <input
+              type="text"
+              placeholder="Type DELETE to confirm"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+            />
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <button type="button" onClick={handleDeleteProject}>
+                Confirm Delete
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDeleteConfirmOpen(false);
+                  setDeleteConfirmText('');
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </DeleteModalContent>
+        </DeleteModalBackdrop>
       )}
     </EditContainer>
   );
