@@ -62,6 +62,7 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
     'details'
   );
   const [showOptions, setShowOptions] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
   const { startEnrichmentForProject } = useEnrichment();
   const startEnrichment = async () => {
     // Implement the logic to start enrichment for the project here
@@ -81,6 +82,29 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
       onClose();
     }
   };
+
+  const handleCopyEmail = () => {
+    const email = `Hello,
+I am contacting you from Rostek regarding ${selectedProject?.name} in ${selectedProject?.location?.city}.
+We are verifying project information and would appreciate your help in confirming:
+• Whether ${selectedProject?.name} project is active, and if yes, what the current status is.
+• Who is the right person to contact for more information such as:
+  - Timetable
+  - Contact information
+  - Facade access or maintenance access solutions for the project
+I would appreciate your reply and I am looking forward to continuing and starting collaboration with your company.
+Best regards,
+Mikael Alakari
+
+Rostek
+rostek.fi
+info@rostek.fi
++358 207 402 560`;
+    navigator.clipboard.writeText(email);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 3000);
+  };
+
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -143,6 +167,17 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
             >
               {selectedProject?.name}
             </h2>
+            <button
+              style={{
+                padding: 4,
+
+                background: 'black',
+                color: '#fff'
+              }}
+              onClick={handleCopyEmail}
+            >
+              {copied ? 'Email Copied!' : 'Copy Email'}
+            </button>
             <button
               style={{
                 padding: 4,
