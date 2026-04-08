@@ -24,6 +24,8 @@ export interface Project {
     earliest?: string;
     latest?: string;
   };
+  createdAt?: Date;
+  updatedAt?: Date;
   buildingHeightMeters?: number | null;
   buildingHeightFloors?: number | null;
   buildingTypeId?: number | BuildingType;

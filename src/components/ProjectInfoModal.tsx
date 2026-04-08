@@ -160,13 +160,16 @@ info@rostek.fi
               padding: '10px 0'
             }}
           >
-            <h2
-              style={{
-                margin: 0
-              }}
-            >
-              {selectedProject?.name}
-            </h2>
+            <div>
+              <h2
+                style={{
+                  margin: 0
+                }}
+              >
+                {selectedProject?.name}
+              </h2>
+              <p>last updated: {selectedProject?.updatedAt?.toString()}</p>
+            </div>
             <button
               style={{
                 padding: 4,
