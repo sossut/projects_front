@@ -32,7 +32,7 @@ const ProjectViewJson: React.FC<ProjectViewJsonProps> = ({ id }) => {
       "buildingHeightFloors": null,
       "glassFacade": "yes | no | null",
       "facadeBasis": "renderings | construction_photos | architectural_specs | mixed | unknown",
-      "projectBudgetEur": null,
+      "budgetEur": null,
       "location": {
         "city": "",
         "address": "",
