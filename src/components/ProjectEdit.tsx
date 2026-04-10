@@ -69,6 +69,10 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
   onProjectUpdate
 }) => {
   const { user } = React.useContext(AppContext);
+  const resolvedUser =
+    (user as unknown as { user?: { id?: number; role?: string } })?.user ??
+    user;
+
   const { buildingUses, getBuildingUses } = useBuildingUses();
   const { updateProject, getProjectSimpleById, deleteProject } = useProjects();
   const [formData, setFormData] = React.useState<Project>({
@@ -167,6 +171,11 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
     onProjectUpdate(projectSimple);
     onClose();
   };
+  React.useEffect(() => {
+    if (resolvedUser?.role === 'admin') {
+      setIsDeleteConfirmOpen(true);
+    }
+  }, [user, resolvedUser?.role]);
   React.useEffect(() => {
     console.log(formData);
   }, [formData]);
@@ -796,7 +805,7 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
         <button type="button" onClick={onClose}>
           Cancel
         </button>
-        {user?.role === 'admin' && (
+        {resolvedUser?.role === 'admin' && (
           <button
             onClick={() => setIsDeleteConfirmOpen(true)}
             type="button"
