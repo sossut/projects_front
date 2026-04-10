@@ -20,17 +20,33 @@ const token = {
   [Symbol.toPrimitive]: () => getAuthToken()
 } as unknown as string;
 
+class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 const fetchJson = async (url: string, options = {}) => {
   try {
     const response = await fetch(url, options);
-    const json = await response.json();
+    const text = await response.text();
+    const json = text ? JSON.parse(text) : null;
     if (response.ok) {
       return json;
     } else {
-      const message = json.message;
-      throw new Error(message);
+      const message =
+        (json as { message?: string } | null)?.message ||
+        `Request failed with status ${response.status}`;
+      throw new ApiError(message, response.status);
     }
   } catch (e) {
+    if (e instanceof ApiError) {
+      throw e;
+    }
     if (e instanceof Error) {
       throw new Error(e.message);
     } else {
@@ -258,9 +274,27 @@ const useProjects = () => {
           }
         }
       );
+      console.log('ihme');
+      if (
+        !data ||
+        data.length === 0 ||
+        (Array.isArray(data) && data[0] === null)
+      ) {
+        console.log('nolla');
+        setProjectCount(0);
+        setProjects([]);
+        return [];
+      }
       setProjects(data);
       setProjectCount(data.length);
+      return data;
     } catch (e) {
+      if (e instanceof ApiError && e.status === 404) {
+        setProjectCount(0);
+        setProjects([]);
+        setError(null);
+        return [];
+      }
       if (e instanceof Error) {
         setError(e.message);
       } else {

@@ -212,6 +212,7 @@ const ProjectTable = () => {
       await getProjectCount(searchTerm);
     }
   };
+
   React.useEffect(() => {
     if (restored) {
       getProjectsSimple(serializeFilters(), sortKey, order, pageSize, 1);
@@ -418,6 +419,7 @@ const ProjectTable = () => {
         </div>
         <button
           onClick={() => {
+            setPage(1);
             setFilters(filterDraft);
             localStorage.setItem(
               'projectTableState',
