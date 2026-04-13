@@ -171,11 +171,7 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
     onProjectUpdate(projectSimple);
     onClose();
   };
-  React.useEffect(() => {
-    if (resolvedUser?.role === 'admin') {
-      setIsDeleteConfirmOpen(true);
-    }
-  }, [user, resolvedUser?.role]);
+
   React.useEffect(() => {
     console.log(formData);
   }, [formData]);
