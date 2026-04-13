@@ -85,7 +85,8 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
 
   const handleCopyEmail = () => {
     const email = `Hello,
-I am contacting you from Rostek regarding ${selectedProject?.name} in ${selectedProject?.location?.city}.
+I’m contacting you on behalf of Rostek. Rostek is a facade access solutions company specializing in safe, practical, and reliable access systems for building maintenance and facade operations. 
+I am messaging you regarding ${selectedProject?.name} in ${selectedProject?.location?.city}.
 We are verifying project information and would appreciate your help in confirming:
 • Whether ${selectedProject?.name} project is active, and if yes, what the current status is.
 • Who is the right person to contact for more information such as:
