@@ -46,12 +46,87 @@ const TD = styled.td`
   text-align: left;
 `;
 
-const FilterDiv = styled.div`
-  margin-bottom: 16px;
+const Toolbar = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
+  margin: 16px 0;
   align-items: center;
+`;
+
+const ActionButton = styled.button`
+  padding: 0.7rem 1rem;
+`;
+
+const SearchInput = styled.input`
+  min-width: 240px;
+  padding: 0.7rem 0.9rem;
+`;
+
+const ControlRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin: 12px 0;
+`;
+
+const FilterPanel = styled.section`
+  margin: 20px 0;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+`;
+
+const FilterHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+`;
+
+const FilterTitle = styled.h3`
+  margin: 0;
+`;
+
+const FilterGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+`;
+
+const FilterField = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  input,
+  select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 0.85rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
+  }
+`;
+
+const FilterActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
 `;
 
 const ProjectTable = () => {
@@ -246,32 +321,32 @@ const ProjectTable = () => {
   };
   return (
     <div style={{ maxWidth: '100%' }}>
-      <div>
-        <button
+      <Toolbar>
+        <ActionButton
           onClick={() => {
             getProjectsSimple(serializeFilters(), sortKey, order, pageSize, 1);
             getProjectCount(serializeFilters());
           }}
         >
           All Projects
-        </button>
-        <button
+        </ActionButton>
+        <ActionButton
           onClick={() => {
             getFavoritedProjects();
           }}
         >
           Favorited Projects
-        </button>
-      </div>
-      <div>
-        <input
+        </ActionButton>
+      </Toolbar>
+      <ControlRow>
+        <SearchInput
           type="text"
           placeholder="Search projects..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={handleSearchKeyDown}
         />
-        <button
+        <ActionButton
           onClick={() => {
             getProjectsBySearch(searchTerm);
 
@@ -279,9 +354,9 @@ const ProjectTable = () => {
           }}
         >
           Search
-        </button>
-      </div>
-      <div>
+        </ActionButton>
+      </ControlRow>
+      <ControlRow>
         <label>Sort by:</label>
         <select onChange={(e) => setSortKey(e.target.value)}>
           <option value="id">ID</option>
@@ -296,178 +371,248 @@ const ProjectTable = () => {
           <option value="asc">Ascending</option>
           <option value="desc">Descending</option>
         </select>
-      </div>
-      <div></div>
-      <FilterDiv>
-        <label>Filter by:</label>
+      </ControlRow>
+      <FilterPanel>
+        <FilterHeader>
+          <FilterTitle>Filters</FilterTitle>
+          <span style={{ opacity: 0.8 }}>
+            Narrow down projects by location, type, budget, and dates
+          </span>
+        </FilterHeader>
 
-        <DropdownCheckbox
-          options={((cities as unknown as City[]) ?? []).map((c) => c.name)}
-          selected={filterDraft.city}
-          onChange={(cityArr) =>
-            setFilterDraft((prev) => ({ ...prev, city: cityArr }))
-          }
-          label="City"
-        />
-        <DropdownCheckbox
-          options={statuses}
-          selected={filterDraft.status}
-          onChange={(statusArr) =>
-            setFilterDraft((prev) => ({ ...prev, status: statusArr }))
-          }
-          label="Status"
-        />
-        <DropdownCheckbox
-          options={((metroAreas as unknown as MetroArea[]) ?? []).map(
-            (m) => m.name
-          )}
-          selected={filterDraft.metroArea}
-          onChange={(metroAreaArr) =>
-            setFilterDraft((prev) => ({ ...prev, metroArea: metroAreaArr }))
-          }
-          label="Metro Area"
-        />
-        <DropdownCheckbox
-          options={((countries as unknown as Country[]) ?? []).map(
-            (c) => c.name
-          )}
-          selected={filterDraft.country}
-          onChange={(countryArr) =>
-            setFilterDraft((prev) => ({ ...prev, country: countryArr }))
-          }
-          label="Country"
-        />
-        <DropdownCheckbox
-          options={((buildingTypes as unknown as BuildingType[]) ?? []).map(
-            (b) => b.buildingType
-          )}
-          selected={filterDraft.buildingType}
-          onChange={(buildingTypeArr) =>
-            setFilterDraft((prev) => ({
-              ...prev,
-              buildingType: buildingTypeArr
-            }))
-          }
-          label="Building Type"
-        />
-        <DropdownCheckbox
-          options={((buildingUses as unknown as BuildingUse[]) ?? []).map(
-            (b) => b.buildingUse
-          )}
-          selected={filterDraft.buildingUse}
-          onChange={(buildingUseArr) =>
-            setFilterDraft((prev) => ({ ...prev, buildingUse: buildingUseArr }))
-          }
-          label="Building Use"
-        />
-        <input
-          type="number"
-          placeholder="Min Budget"
-          value={filterDraft.minBudget}
-          onChange={(e) =>
-            setFilterDraft((prev) => ({ ...prev, minBudget: e.target.value }))
-          }
-        />
-        <input
-          type="number"
-          placeholder="Max Budget"
-          value={filterDraft.maxBudget}
-          onChange={(e) =>
-            setFilterDraft((prev) => ({ ...prev, maxBudget: e.target.value }))
-          }
-        />
-        <input
-          type="number"
-          placeholder="Min Height (m)"
-          value={filterDraft.minHeightMeters}
-          onChange={(e) =>
-            setFilterDraft((prev) => ({
-              ...prev,
-              minHeightMeters: e.target.value
-            }))
-          }
-        />
-        <input
-          type="number"
-          placeholder="Max Height (m)"
-          value={filterDraft.maxHeightMeters}
-          onChange={(e) =>
-            setFilterDraft((prev) => ({
-              ...prev,
-              maxHeightMeters: e.target.value
-            }))
-          }
-        />
-        <div>
-          <label style={{ display: 'block' }}>Expected Completion Date:</label>
-          <input
-            type="date"
-            placeholder="First expected date"
-            value={filterDraft.firstDate}
-            onChange={(e) =>
-              setFilterDraft((prev) => ({ ...prev, firstDate: e.target.value }))
-            }
-          />
-          <input
-            type="date"
-            placeholder="Last expected date"
-            value={filterDraft.lastDate}
-            onChange={(e) =>
-              setFilterDraft((prev) => ({ ...prev, lastDate: e.target.value }))
-            }
-          />
-        </div>
-        <button
-          onClick={() => {
-            setPage(1);
-            setFilters(filterDraft);
-            localStorage.setItem(
-              'projectTableState',
-              JSON.stringify({ filters: filterDraft, sortKey, order, pageSize })
-            );
-          }}
-          style={{ marginRight: 8 }}
-        >
-          Set Filters
-        </button>
-        <button
-          onClick={() => {
-            setFilters({
-              city: [],
-              status: [],
-              metroArea: [],
-              country: [],
-              buildingType: [],
-              buildingUse: [],
-              minBudget: '',
-              maxBudget: '',
-              minHeightMeters: '',
-              maxHeightMeters: '',
-              firstDate: '',
-              lastDate: ''
-            });
-            // Optionally fetch all projects after clearing
-            getProjectsSimple('', sortKey, order, pageSize, page);
-            setFilterDraft({
-              city: [],
-              status: [],
-              metroArea: [],
-              country: [],
-              buildingType: [],
-              buildingUse: [],
-              minBudget: '',
-              maxBudget: '',
-              minHeightMeters: '',
-              maxHeightMeters: '',
-              firstDate: '',
-              lastDate: ''
-            });
-            localStorage.removeItem('projectTableState');
-          }}
-        >
-          Clear Filters
-        </button>
-      </FilterDiv>
+        <FilterGrid>
+          <FilterField>
+            <label>City</label>
+            <DropdownCheckbox
+              options={((cities as unknown as City[]) ?? []).map((c) => c.name)}
+              selected={filterDraft.city}
+              onChange={(cityArr) =>
+                setFilterDraft((prev) => ({ ...prev, city: cityArr }))
+              }
+              label="Select city"
+            />
+          </FilterField>
+
+          <FilterField>
+            <label>Status</label>
+            <DropdownCheckbox
+              options={statuses}
+              selected={filterDraft.status}
+              onChange={(statusArr) =>
+                setFilterDraft((prev) => ({ ...prev, status: statusArr }))
+              }
+              label="Select status"
+            />
+          </FilterField>
+
+          <FilterField>
+            <label>Metro Area</label>
+            <DropdownCheckbox
+              options={((metroAreas as unknown as MetroArea[]) ?? []).map(
+                (m) => m.name
+              )}
+              selected={filterDraft.metroArea}
+              onChange={(metroAreaArr) =>
+                setFilterDraft((prev) => ({ ...prev, metroArea: metroAreaArr }))
+              }
+              label="Select metro area"
+            />
+          </FilterField>
+
+          <FilterField>
+            <label>Country</label>
+            <DropdownCheckbox
+              options={((countries as unknown as Country[]) ?? []).map(
+                (c) => c.name
+              )}
+              selected={filterDraft.country}
+              onChange={(countryArr) =>
+                setFilterDraft((prev) => ({ ...prev, country: countryArr }))
+              }
+              label="Select country"
+            />
+          </FilterField>
+
+          <FilterField>
+            <label>Building Type</label>
+            <DropdownCheckbox
+              options={((buildingTypes as unknown as BuildingType[]) ?? []).map(
+                (b) => b.buildingType
+              )}
+              selected={filterDraft.buildingType}
+              onChange={(buildingTypeArr) =>
+                setFilterDraft((prev) => ({
+                  ...prev,
+                  buildingType: buildingTypeArr
+                }))
+              }
+              label="Select building type"
+            />
+          </FilterField>
+
+          <FilterField>
+            <label>Building Use</label>
+            <DropdownCheckbox
+              options={((buildingUses as unknown as BuildingUse[]) ?? []).map(
+                (b) => b.buildingUse
+              )}
+              selected={filterDraft.buildingUse}
+              onChange={(buildingUseArr) =>
+                setFilterDraft((prev) => ({
+                  ...prev,
+                  buildingUse: buildingUseArr
+                }))
+              }
+              label="Select building use"
+            />
+          </FilterField>
+
+          <FilterField>
+            <label>Min Budget</label>
+            <input
+              type="number"
+              placeholder="Min Budget"
+              value={filterDraft.minBudget}
+              onChange={(e) =>
+                setFilterDraft((prev) => ({
+                  ...prev,
+                  minBudget: e.target.value
+                }))
+              }
+            />
+          </FilterField>
+
+          <FilterField>
+            <label>Max Budget</label>
+            <input
+              type="number"
+              placeholder="Max Budget"
+              value={filterDraft.maxBudget}
+              onChange={(e) =>
+                setFilterDraft((prev) => ({
+                  ...prev,
+                  maxBudget: e.target.value
+                }))
+              }
+            />
+          </FilterField>
+
+          <FilterField>
+            <label>Min Height (m)</label>
+            <input
+              type="number"
+              placeholder="Min Height (m)"
+              value={filterDraft.minHeightMeters}
+              onChange={(e) =>
+                setFilterDraft((prev) => ({
+                  ...prev,
+                  minHeightMeters: e.target.value
+                }))
+              }
+            />
+          </FilterField>
+
+          <FilterField>
+            <label>Max Height (m)</label>
+            <input
+              type="number"
+              placeholder="Max Height (m)"
+              value={filterDraft.maxHeightMeters}
+              onChange={(e) =>
+                setFilterDraft((prev) => ({
+                  ...prev,
+                  maxHeightMeters: e.target.value
+                }))
+              }
+            />
+          </FilterField>
+
+          <FilterField>
+            <label>First Expected Date</label>
+            <input
+              type="date"
+              value={filterDraft.firstDate}
+              onChange={(e) =>
+                setFilterDraft((prev) => ({
+                  ...prev,
+                  firstDate: e.target.value
+                }))
+              }
+            />
+          </FilterField>
+
+          <FilterField>
+            <label>Last Expected Date</label>
+            <input
+              type="date"
+              value={filterDraft.lastDate}
+              onChange={(e) =>
+                setFilterDraft((prev) => ({
+                  ...prev,
+                  lastDate: e.target.value
+                }))
+              }
+            />
+          </FilterField>
+        </FilterGrid>
+
+        <FilterActions>
+          <ActionButton
+            onClick={() => {
+              setPage(1);
+              setFilters(filterDraft);
+              localStorage.setItem(
+                'projectTableState',
+                JSON.stringify({
+                  filters: filterDraft,
+                  sortKey,
+                  order,
+                  pageSize
+                })
+              );
+            }}
+          >
+            Set Filters
+          </ActionButton>
+          <ActionButton
+            onClick={() => {
+              setFilters({
+                city: [],
+                status: [],
+                metroArea: [],
+                country: [],
+                buildingType: [],
+                buildingUse: [],
+                minBudget: '',
+                maxBudget: '',
+                minHeightMeters: '',
+                maxHeightMeters: '',
+                firstDate: '',
+                lastDate: ''
+              });
+              // Optionally fetch all projects after clearing
+              getProjectsSimple('', sortKey, order, pageSize, page);
+              setFilterDraft({
+                city: [],
+                status: [],
+                metroArea: [],
+                country: [],
+                buildingType: [],
+                buildingUse: [],
+                minBudget: '',
+                maxBudget: '',
+                minHeightMeters: '',
+                maxHeightMeters: '',
+                firstDate: '',
+                lastDate: ''
+              });
+              localStorage.removeItem('projectTableState');
+            }}
+          >
+            Clear Filters
+          </ActionButton>
+        </FilterActions>
+      </FilterPanel>
       <div>
         <button
           onClick={() => {

@@ -59,8 +59,9 @@ const DropdownCheckbox: React.FC<DropdownCheckboxProps> = ({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
-            width: '70%',
+            width: '90%',
             boxSizing: 'border-box',
+            border: '1px solid #ccc',
             marginBottom: 8,
             padding: 4
           }}
