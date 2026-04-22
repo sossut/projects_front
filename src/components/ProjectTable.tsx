@@ -261,7 +261,7 @@ const TableWrap = styled.div`
 
 const MediaCell = styled(TD)`
   white-space: normal;
-  max-width: 228px;
+  max-width: 292px;
 `;
 
 const MediaList = styled.div`
@@ -272,20 +272,20 @@ const MediaList = styled.div`
 `;
 
 const MediaThumb = styled.img`
-  height: 76px;
+  height: 104px;
   width: auto;
-  max-width: 116px;
+  max-width: 154px;
   object-fit: cover;
   cursor: pointer;
 
   @media (max-width: 1440px) {
-    height: 54px;
-    max-width: 80px;
+    height: 70px;
+    max-width: 104px;
   }
 
   @media (max-width: 1280px) {
-    height: 44px;
-    max-width: 64px;
+    height: 56px;
+    max-width: 82px;
   }
 `;
 
@@ -943,12 +943,12 @@ const ProjectTable = () => {
               <TH style={{ width: 78 }}>City</TH>
               <TH style={{ width: 78 }}>Country</TH>
               <TH style={{ width: 78 }}>Status</TH>
-              <TH style={{ width: 82 }}>Type</TH>
+              <TH style={{ width: 72 }}>Type</TH>
               <TH style={{ width: 96 }}>Uses</TH>
               <TH style={{ width: 42 }}>m</TH>
               <TH style={{ width: 32 }}>Floors</TH>
               <TH style={{ width: 88 }}>Expected</TH>
-              <TH style={{ width: 228 }}>Images</TH>
+              <TH style={{ width: 292 }}>Images</TH>
               <TH style={{ width: 20 }}>Info</TH>
             </tr>
           </THead>
