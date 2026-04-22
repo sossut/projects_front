@@ -20,6 +20,8 @@ const token = {
   [Symbol.toPrimitive]: () => getAuthToken()
 } as unknown as string;
 
+const activeEnrichmentProjects = new Set<number>();
+
 class ApiError extends Error {
   status: number;
 
@@ -148,12 +150,31 @@ const useProjects = () => {
   };
 
   const updateProjectInList = (updatedProject: Project) => {
+    const updatedId = updatedProject.id;
+    if (updatedId === undefined || updatedId === null) {
+      return;
+    }
+
+    const updatedIdAsNumber = Number(updatedId);
+    const hasNumericId = Number.isFinite(updatedIdAsNumber);
+
     setProjects((prev) =>
-      prev.map((p) =>
-        p.id === updatedProject.id
+      prev.map((p) => {
+        const currentId = p.id;
+        if (currentId === undefined || currentId === null) {
+          return p;
+        }
+
+        const currentIdAsNumber = Number(currentId);
+        const isSameProject = hasNumericId
+          ? Number.isFinite(currentIdAsNumber) &&
+            currentIdAsNumber === updatedIdAsNumber
+          : String(currentId) === String(updatedId);
+
+        return isSameProject
           ? { ...p, ...extractSummaryFields(updatedProject) }
-          : p
-      )
+          : p;
+      })
     );
   };
 
@@ -832,6 +853,71 @@ const useMetroAreas = () => {
 const useEnrichment = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const clearEnrichmentInFlight = (projectId: number) => {
+    activeEnrichmentProjects.delete(projectId);
+  };
+
+  const normalizeEnrichmentJobStatus = (status: unknown) => {
+    if (typeof status !== 'string') {
+      return 'unknown';
+    }
+
+    const normalized = status.toLowerCase();
+    if (normalized === 'complete') {
+      return 'completed';
+    }
+
+    return normalized;
+  };
+
+  const getEnrichmentJobStatus = async (jobId: number | string) => {
+    return fetchJson(`${baseUrl}/enrichment/job/${jobId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    });
+  };
+
+  const waitForEnrichmentJobTerminalStatus = async (
+    jobId: number | string,
+    intervalMs = 5000,
+    timeoutMs = 15 * 60 * 1000
+  ) => {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+      const response = await getEnrichmentJobStatus(jobId);
+      const status = normalizeEnrichmentJobStatus(
+        (response as { status?: unknown; jobStatus?: unknown; state?: unknown })
+          ?.status ??
+          (
+            response as {
+              status?: unknown;
+              jobStatus?: unknown;
+              state?: unknown;
+            }
+          )?.jobStatus ??
+          (
+            response as {
+              status?: unknown;
+              jobStatus?: unknown;
+              state?: unknown;
+            }
+          )?.state
+      );
+
+      if (status === 'completed' || status === 'failed') {
+        return { status, response };
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+
+    throw new Error('Timed out while waiting for enrichment to finish');
+  };
+
   const startProjectSearch = async (
     buildingTypes: string[],
     location: string,
@@ -868,6 +954,16 @@ const useEnrichment = () => {
       setLoading(false);
       return;
     }
+
+    if (activeEnrichmentProjects.has(projectId)) {
+      const message = `Enrichment is already running for project ${projectId}`;
+      setError(message);
+      setLoading(false);
+      throw new Error(message);
+    }
+
+    activeEnrichmentProjects.add(projectId);
+
     try {
       console.log(`startEnrichmentForProject: ${projectId}`);
       const response = await fetchJson(
@@ -882,6 +978,7 @@ const useEnrichment = () => {
       );
       return response;
     } catch (e) {
+      clearEnrichmentInFlight(projectId);
       if (e instanceof Error) {
         setError(e.message);
       } else {
@@ -896,7 +993,9 @@ const useEnrichment = () => {
     loading,
     error,
     startProjectSearch,
-    startEnrichmentForProject
+    startEnrichmentForProject,
+    waitForEnrichmentJobTerminalStatus,
+    clearEnrichmentInFlight
   };
 };
 

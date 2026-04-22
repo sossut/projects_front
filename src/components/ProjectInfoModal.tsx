@@ -8,7 +8,7 @@ import ProjectEdit from './ProjectEdit';
 import ProjectModalOptionsMenu from './ProjectModalOptionsMenu';
 import ProjectViewJson from './ProjectViewJson';
 import type { MetroArea } from '../interfaces/MetroArea';
-import { useEnrichment } from '../hooks/ApiHooks';
+import { useEnrichment, useProjects } from '../hooks/ApiHooks';
 interface ProjectInfoModalProps {
   selectedProject: Project | null;
   onClose: () => void;
@@ -63,23 +63,63 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
   );
   const [showOptions, setShowOptions] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
-  const { startEnrichmentForProject } = useEnrichment();
+  const {
+    startEnrichmentForProject,
+    waitForEnrichmentJobTerminalStatus,
+    clearEnrichmentInFlight
+  } = useEnrichment();
+  const { getProjectFormatted } = useProjects();
   const startEnrichment = async () => {
-    // Implement the logic to start enrichment for the project here
+    const projectId = selectedProject?.id || 0;
+
     if (
       window.confirm(
         `Are you sure you want to start enrichment for ${selectedProject?.name}?`
       )
     ) {
-      console.log(
-        `Starting enrichment for project: ${selectedProject?.name} (ID: ${selectedProject?.id})`
-      );
-      const job = await startEnrichmentForProject(selectedProject?.id || 0);
-      console.log('Enrichment job started:', job);
-      alert(
-        `Enrichment job started, job ID: ${job?.jobId || 'unknown'} for project ${selectedProject?.name}`
-      );
-      onClose();
+      try {
+        console.log(
+          `Starting enrichment for project: ${selectedProject?.name} (ID: ${projectId})`
+        );
+        const job = await startEnrichmentForProject(projectId);
+        console.log('Enrichment job started:', job);
+        const jobId =
+          (job as { jobId?: number | string; id?: number | string } | undefined)
+            ?.jobId ??
+          (job as { jobId?: number | string; id?: number | string } | undefined)
+            ?.id;
+
+        if (!jobId || !selectedProject?.id) {
+          alert('Could not start enrichment: missing job id');
+          return;
+        }
+
+        alert(
+          `Enrichment job started, job ID: ${jobId} for project ${selectedProject?.name}`
+        );
+        onClose();
+
+        const result = await waitForEnrichmentJobTerminalStatus(jobId, 5000);
+        const refreshedProject = await getProjectFormatted(selectedProject.id);
+        if (refreshedProject) {
+          onProjectUpdate(refreshedProject);
+        }
+
+        if (result.status === 'completed') {
+          alert(`Enrichment completed for ${selectedProject.name}`);
+        } else {
+          alert(`Enrichment failed for ${selectedProject.name}`);
+        }
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : 'Failed to start enrichment';
+        alert(message);
+        console.error('Enrichment flow failed:', e);
+      } finally {
+        if (projectId) {
+          clearEnrichmentInFlight(projectId);
+        }
+      }
     }
   };
 
