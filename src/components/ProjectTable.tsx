@@ -25,8 +25,19 @@ import favoritedIcon from '../assets/star-symbol-icon.png';
 import checkedIcon from '../assets/check-mark-icon.png';
 import unfavoritedIcon from '../assets/star.png';
 const Table = styled.table`
+  width: 100%;
   max-width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
+  font-size: 0.85rem;
+
+  @media (max-width: 1440px) {
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 1280px) {
+    font-size: 0.73rem;
+  }
 `;
 
 const THead = styled.thead`
@@ -35,15 +46,36 @@ const THead = styled.thead`
 `;
 
 const TH = styled.th`
-  padding: 8px;
+  padding: 4px 6px;
   border: 1px solid #ddd;
   text-align: left;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  @media (max-width: 1440px) {
+    padding: 3px 5px;
+  }
+
+  @media (max-width: 1280px) {
+    padding: 2px 4px;
+  }
 `;
 
 const TD = styled.td`
-  padding: 8px;
+  padding: 4px 6px;
   border: 1px solid #ddd;
   text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  @media (max-width: 1440px) {
+    padding: 3px 5px;
+  }
+
+  @media (max-width: 1280px) {
+    padding: 2px 4px;
+  }
 `;
 
 const Toolbar = styled.div`
@@ -52,15 +84,42 @@ const Toolbar = styled.div`
   gap: 12px;
   margin: 16px 0;
   align-items: center;
+
+  @media (max-width: 1440px) {
+    gap: 8px;
+    margin: 12px 0;
+  }
 `;
 
 const ActionButton = styled.button`
-  padding: 0.7rem 1rem;
+  padding: 0.55rem 0.8rem;
+
+  @media (max-width: 1440px) {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 1280px) {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.8rem;
+  }
 `;
 
 const SearchInput = styled.input`
-  min-width: 240px;
-  padding: 0.7rem 0.9rem;
+  min-width: 180px;
+  padding: 0.55rem 0.75rem;
+
+  @media (max-width: 1440px) {
+    min-width: 150px;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 1280px) {
+    min-width: 130px;
+    padding: 0.4rem 0.55rem;
+    font-size: 0.8rem;
+  }
 `;
 
 const ControlRow = styled.div`
@@ -69,6 +128,11 @@ const ControlRow = styled.div`
   gap: 12px;
   align-items: center;
   margin: 12px 0;
+
+  @media (max-width: 1440px) {
+    gap: 8px;
+    margin: 10px 0;
+  }
 `;
 
 const FilterPanel = styled.section`
@@ -79,6 +143,16 @@ const FilterPanel = styled.section`
   background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(6px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  @media (max-width: 1440px) {
+    padding: 14px;
+    margin: 16px 0;
+  }
+
+  @media (max-width: 1280px) {
+    padding: 12px;
+    margin: 12px 0;
+  }
 `;
 
 const FilterHeader = styled.div`
@@ -88,16 +162,36 @@ const FilterHeader = styled.div`
   gap: 12px;
   margin-bottom: 14px;
   flex-wrap: wrap;
+
+  @media (max-width: 1440px) {
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+  }
 `;
 
 const FilterTitle = styled.h3`
   margin: 0;
+
+  @media (max-width: 1440px) {
+    font-size: 1rem;
+  }
 `;
 
 const FilterGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
+
+  @media (max-width: 1440px) {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 8px;
+  }
+
+  @media (max-width: 1280px) {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 6px;
+  }
 `;
 
 const FilterField = styled.div`
@@ -120,6 +214,32 @@ const FilterField = styled.div`
     background: rgba(255, 255, 255, 0.08);
     color: inherit;
   }
+
+  @media (max-width: 1440px) {
+    gap: 4px;
+
+    label {
+      font-size: 0.8rem;
+    }
+
+    input,
+    select {
+      padding: 0.5rem 0.6rem;
+      font-size: 0.82rem;
+    }
+  }
+
+  @media (max-width: 1280px) {
+    label {
+      font-size: 0.75rem;
+    }
+
+    input,
+    select {
+      padding: 0.4rem 0.5rem;
+      font-size: 0.78rem;
+    }
+  }
 `;
 
 const FilterActions = styled.div`
@@ -127,6 +247,119 @@ const FilterActions = styled.div`
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 14px;
+
+  @media (max-width: 1440px) {
+    gap: 8px;
+    margin-top: 10px;
+  }
+`;
+
+const TableWrap = styled.div`
+  width: 100%;
+  max-width: 100%;
+`;
+
+const MediaCell = styled(TD)`
+  white-space: normal;
+  max-width: 228px;
+`;
+
+const MediaList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-content: flex-start;
+`;
+
+const MediaThumb = styled.img`
+  height: 76px;
+  width: auto;
+  max-width: 116px;
+  object-fit: cover;
+  cursor: pointer;
+
+  @media (max-width: 1440px) {
+    height: 54px;
+    max-width: 80px;
+  }
+
+  @media (max-width: 1280px) {
+    height: 44px;
+    max-width: 64px;
+  }
+`;
+
+const StatusIcon = styled.img`
+  height: 24px;
+  width: 24px;
+  object-fit: contain;
+
+  @media (max-width: 1440px) {
+    height: 20px;
+    width: 20px;
+  }
+
+  @media (max-width: 1280px) {
+    height: 18px;
+    width: 18px;
+  }
+`;
+
+const ActionCell = styled(TD)`
+  width: 34px;
+  white-space: nowrap;
+  text-align: center;
+`;
+
+const InfoButton = styled.button`
+  width: 100%;
+  padding: 0.2rem 0.25rem;
+  font-size: 0.62rem;
+  line-height: 1;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  white-space: normal;
+
+  @media (min-width: 1600px) {
+    padding: 0.25rem 0.35rem;
+    font-size: 0.68rem;
+  }
+
+  @media (max-width: 1440px) {
+    padding: 0.2rem 0.3rem;
+    font-size: 0.64rem;
+  }
+
+  @media (max-width: 1280px) {
+    padding: 0.18rem 0.28rem;
+    font-size: 0.6rem;
+  }
+`;
+
+const CompactTextCell = styled(TD)`
+  white-space: normal;
+`;
+
+const CenterCell = styled(TD)`
+  text-align: center;
+  white-space: nowrap;
+`;
+
+const UsesCell = styled(TD)`
+  white-space: normal;
+  vertical-align: top;
+`;
+
+const UsesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
 `;
 
 const ProjectTable = () => {
@@ -215,6 +448,19 @@ const ProjectTable = () => {
 
   const calculatePageCount = (totalCount: number, pageSize: number) => {
     return Math.ceil(totalCount / pageSize);
+  };
+
+  const formatHeightMeters = (value: number | string | null | undefined) => {
+    if (value === null || value === undefined || value === '') {
+      return '';
+    }
+
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) {
+      return '';
+    }
+
+    return numericValue.toFixed(1);
   };
 
   const handleEdit = async (projectId: number) => {
@@ -320,7 +566,7 @@ const ProjectTable = () => {
     }
   };
   return (
-    <div style={{ maxWidth: '100%' }}>
+    <div style={{ maxWidth: '100%', overflowX: 'hidden' }}>
       <Toolbar>
         <ActionButton
           onClick={() => {
@@ -686,131 +932,139 @@ const ProjectTable = () => {
           Refresh
         </button>
       </div>
-      <Table>
-        <THead>
-          <tr>
-            <TH>Checked</TH>
-            <TH>Favorited</TH>
-            <TH>ID</TH>
-            <TH>Name</TH>
-            <TH>City</TH>
-            <TH>Country</TH>
-            <TH>Status</TH>
-            <TH>Building Type</TH>
-            <TH>Building Uses</TH>
-            <TH>Height (m)</TH>
-            <TH>Height (Floors)</TH>
-            <TH>Expected Completion Date</TH>
-            <TH>Images</TH>
-            <TH>More Info</TH>
-          </tr>
-        </THead>
-        <tbody>
-          {projects.map((project) => (
-            <tr key={project.id}>
-              {project.checkedBy ? (
-                <TD>
-                  <img height={'64px'} src={checkedIcon} alt="Checked" />
-                </TD>
-              ) : (
-                <TD></TD>
-              )}
-              {isFavoritedByCurrentUser(project) ? (
-                <TD>
-                  <button
-                    onClick={() => {
-                      deleteProjectFavorite(project.id as number);
-                      updateProjectInList({
-                        ...project,
-                        favoritedByUsers: (
-                          project.favoritedByUsers || []
-                        ).filter((u) => u.id !== userId)
-                      });
-                    }}
-                  >
-                    <img height={'64px'} src={favoritedIcon} alt="Favorited" />
-                  </button>
-                </TD>
-              ) : (
-                <TD>
-                  <button
-                    onClick={() => {
-                      postProjectFavorite(project.id as number);
-                      updateProjectInList({
-                        ...project,
-                        favoritedByUsers: [
-                          ...(project.favoritedByUsers || []),
-                          { id: userId, username: '' }
-                        ]
-                      });
-                    }}
-                  >
-                    <img
-                      height={'64px'}
-                      src={unfavoritedIcon}
-                      alt="Not Favorited"
-                    />
-                  </button>
-                </TD>
-              )}
-
-              <TD>{project.id}</TD>
-              <TD>{project.name}</TD>
-              <TD>{project.city as string}</TD>
-              <TD>{project.country as string}</TD>
-              <TD>{project.status}</TD>
-              <TD>{project.buildingType}</TD>
-              <TD>
-                {(project.buildingUses as BuildingUse[] | undefined)?.map(
-                  (use, idx) => (
-                    <span key={use.id as number}>
-                      {use.buildingUse}
-                      {idx < (project.buildingUses as BuildingUse[]).length - 1
-                        ? ', '
-                        : ''}
-                    </span>
-                  )
-                )}
-              </TD>
-              <TD>{project.buildingHeightMeters}</TD>
-              <TD>{project.buildingHeightFloors}</TD>
-              <TD>{project.expectedDateText}</TD>
-
-              <TD style={{ display: 'flex', maxWidth: 500, flexWrap: 'wrap' }}>
-                {project.media?.map((media) => (
-                  <img
-                    key={media.id}
-                    src={media.url}
-                    alt="Project"
-                    style={{
-                      height: 100,
-                      marginRight: 5,
-                      marginBottom: 5,
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => {
-                      setSelectedImage(media.url);
-                      setSelectedImageDate(
-                        (media.mediaDate as string | undefined) || null
-                      );
-                      setIsModalOpen('image');
-                    }}
-                  />
-                ))}
-              </TD>
-              <TD>
-                <button
-                  onClick={() => {
-                    handleEdit(project.id as number);
-                  }}
-                >
-                  More Info
-                </button>
-              </TD>
+      <TableWrap>
+        <Table>
+          <THead>
+            <tr>
+              <TH style={{ width: 30 }}>Chk</TH>
+              <TH style={{ width: 34 }}>Fav</TH>
+              <TH style={{ width: 42 }}>ID</TH>
+              <TH style={{ width: 138 }}>Name</TH>
+              <TH style={{ width: 78 }}>City</TH>
+              <TH style={{ width: 78 }}>Country</TH>
+              <TH style={{ width: 78 }}>Status</TH>
+              <TH style={{ width: 82 }}>Type</TH>
+              <TH style={{ width: 96 }}>Uses</TH>
+              <TH style={{ width: 42 }}>m</TH>
+              <TH style={{ width: 32 }}>Floors</TH>
+              <TH style={{ width: 88 }}>Expected</TH>
+              <TH style={{ width: 228 }}>Images</TH>
+              <TH style={{ width: 20 }}>Info</TH>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </THead>
+          <tbody>
+            {projects.map((project) => (
+              <tr key={project.id}>
+                {project.checkedBy ? (
+                  <CenterCell>
+                    <StatusIcon src={checkedIcon} alt="Checked" />
+                  </CenterCell>
+                ) : (
+                  <CenterCell></CenterCell>
+                )}
+                {isFavoritedByCurrentUser(project) ? (
+                  <CenterCell>
+                    <button
+                      onClick={() => {
+                        deleteProjectFavorite(project.id as number);
+                        updateProjectInList({
+                          ...project,
+                          favoritedByUsers: (
+                            project.favoritedByUsers || []
+                          ).filter((u) => u.id !== userId)
+                        });
+                      }}
+                    >
+                      <StatusIcon src={favoritedIcon} alt="Favorited" />
+                    </button>
+                  </CenterCell>
+                ) : (
+                  <CenterCell>
+                    <button
+                      onClick={() => {
+                        postProjectFavorite(project.id as number);
+                        updateProjectInList({
+                          ...project,
+                          favoritedByUsers: [
+                            ...(project.favoritedByUsers || []),
+                            { id: userId, username: '' }
+                          ]
+                        });
+                      }}
+                    >
+                      <StatusIcon src={unfavoritedIcon} alt="Not Favorited" />
+                    </button>
+                  </CenterCell>
+                )}
+
+                <CenterCell>{project.id}</CenterCell>
+                <CompactTextCell title={project.name}>
+                  {project.name}
+                </CompactTextCell>
+                <CompactTextCell title={project.city as string}>
+                  {project.city as string}
+                </CompactTextCell>
+                <CompactTextCell title={project.country as string}>
+                  {project.country as string}
+                </CompactTextCell>
+                <CompactTextCell title={project.status ?? ''}>
+                  {project.status}
+                </CompactTextCell>
+                <CompactTextCell title={project.buildingType ?? ''}>
+                  {project.buildingType}
+                </CompactTextCell>
+                <UsesCell>
+                  <UsesList>
+                    {(project.buildingUses as BuildingUse[] | undefined)?.map(
+                      (use) => (
+                        <span key={use.id as number} title={use.buildingUse}>
+                          {use.buildingUse}
+                        </span>
+                      )
+                    )}
+                  </UsesList>
+                </UsesCell>
+                <CenterCell>
+                  {formatHeightMeters(project.buildingHeightMeters ?? null)}
+                </CenterCell>
+                <CenterCell>{project.buildingHeightFloors}</CenterCell>
+                <CompactTextCell title={project.expectedDateText ?? ''}>
+                  {project.expectedDateText}
+                </CompactTextCell>
+
+                <MediaCell>
+                  <MediaList>
+                    {project.media?.map((media) => (
+                      <MediaThumb
+                        key={media.id}
+                        src={media.url}
+                        alt="Project"
+                        onClick={() => {
+                          setSelectedImage(media.url);
+                          setSelectedImageDate(
+                            (media.mediaDate as string | undefined) || null
+                          );
+                          setIsModalOpen('image');
+                        }}
+                      />
+                    ))}
+                  </MediaList>
+                </MediaCell>
+                <ActionCell>
+                  <InfoButton
+                    onClick={() => {
+                      handleEdit(project.id as number);
+                    }}
+                  >
+                    <span>More</span>
+                    <span>Info</span>
+                  </InfoButton>
+                </ActionCell>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </TableWrap>
       {isModalOpen === 'image' && selectedImage && (
         <ProjectImageModal
           imageUrl={selectedImage}
