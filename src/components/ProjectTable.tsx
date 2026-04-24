@@ -925,7 +925,13 @@ const ProjectTable = () => {
       <div style={{ margin: '16px 0' }}>
         <button
           onClick={() => {
-            getProjectsSimple(serializeFilters(), sortKey, order, pageSize, 1);
+            getProjectsSimple(
+              serializeFilters(),
+              sortKey,
+              order,
+              pageSize,
+              page
+            );
             getProjectCount(serializeFilters());
           }}
         >
