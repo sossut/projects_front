@@ -1,6 +1,6 @@
 import React from 'react';
 
-import logo from '../assets/react.svg';
+import logo from '../assets/r_logo.jpg';
 
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
@@ -57,7 +57,13 @@ const NavBar: React.FC = () => {
     <Nav>
       <NavBarCore>
         <NavLink to="/" className="navbar-logo">
-          <img src={logo} alt="Logo" />
+          <img
+            style={{
+              height: '80px'
+            }}
+            src={logo}
+            alt="Logo"
+          />
         </NavLink>
         <NavBarLink>
           <NavLink to="/" className="navbar-link">
