@@ -375,7 +375,8 @@ const ProjectTable = () => {
     updateProjectInList,
     getProjectFormatted,
     postProjectFavorite,
-    deleteProjectFavorite
+    deleteProjectFavorite,
+    exportProjectsExcel
   } = useProjects();
   const { cities, getCities } = useCities();
   const { countries, getCountries } = useCountries();
@@ -484,6 +485,123 @@ const ProjectTable = () => {
     return params.toString();
   };
 
+  const syncFilters = (nextFilters: typeof filters) => {
+    setFilterDraft(nextFilters);
+    setFilters(nextFilters);
+    setPage(1);
+    localStorage.setItem(
+      'projectTableState',
+      JSON.stringify({
+        filters: nextFilters,
+        sortKey,
+        order,
+        pageSize
+      })
+    );
+  };
+
+  const countryList = (countries as unknown as Country[]) ?? [];
+  const metroAreaList = (metroAreas as unknown as MetroArea[]) ?? [];
+  const cityList = (cities as unknown as City[]) ?? [];
+
+  const countryNameById = React.useMemo(() => {
+    const countryMap = new Map<number, string>();
+    countryList.forEach((country) => {
+      countryMap.set(Number(country.id), country.name);
+    });
+    return countryMap;
+  }, [countryList]);
+
+  const getMetroAreaCountryName = (metroArea: MetroArea) => {
+    return (
+      metroArea.country?.name ||
+      metroArea.countryName ||
+      countryNameById.get(Number(metroArea.countryId)) ||
+      ''
+    );
+  };
+
+  const getMetroOptionsForCountries = (selectedCountries: string[]) => {
+    if (selectedCountries.length === 0) {
+      return metroAreaList.map((metroArea) => metroArea.name);
+    }
+
+    const selectedCountrySet = new Set(
+      selectedCountries.map((countryName) => countryName.toLowerCase())
+    );
+
+    return metroAreaList
+      .filter((metroArea) =>
+        selectedCountrySet.has(getMetroAreaCountryName(metroArea).toLowerCase())
+      )
+      .map((metroArea) => metroArea.name);
+  };
+
+  const metroAreaNameById = React.useMemo(() => {
+    const metroMap = new Map<number, string>();
+    metroAreaList.forEach((metroArea) => {
+      metroMap.set(Number(metroArea.id), metroArea.name);
+    });
+    return metroMap;
+  }, [metroAreaList]);
+
+  const getCityMetroAreaName = (city: City) => {
+    if (typeof city.metroAreaId === 'object' && city.metroAreaId !== null) {
+      return city.metroAreaId.name;
+    }
+    return metroAreaNameById.get(Number(city.metroAreaId)) || '';
+  };
+
+  const getCityOptionsForMetros = (
+    selectedMetros: string[],
+    selectedCountries: string[]
+  ) => {
+    if (selectedMetros.length > 0) {
+      const selectedMetroSet = new Set(
+        selectedMetros.map((metroName) => metroName.toLowerCase())
+      );
+
+      return cityList
+        .filter((city) =>
+          selectedMetroSet.has(getCityMetroAreaName(city).toLowerCase())
+        )
+        .map((city) => city.name);
+    }
+
+    if (selectedCountries.length > 0) {
+      const selectedCountrySet = new Set(
+        selectedCountries.map((countryName) => countryName.toLowerCase())
+      );
+
+      return cityList
+        .filter((city) => {
+          const metroAreaName = getCityMetroAreaName(city);
+          const metroArea = metroAreaList.find(
+            (metro) => metro.name === metroAreaName
+          );
+          if (!metroArea) {
+            return false;
+          }
+          return selectedCountrySet.has(
+            getMetroAreaCountryName(metroArea).toLowerCase()
+          );
+        })
+        .map((city) => city.name);
+    }
+
+    return cityList.map((city) => city.name);
+  };
+
+  const filteredMetroAreaOptions = React.useMemo(
+    () => getMetroOptionsForCountries(filterDraft.country),
+    [filterDraft.country, metroAreaList]
+  );
+
+  const filteredCityOptions = React.useMemo(
+    () => getCityOptionsForMetros(filterDraft.metroArea, filterDraft.country),
+    [filterDraft.metroArea, filterDraft.country, cityList, metroAreaNameById]
+  );
+
   React.useEffect(() => {
     getCities();
     getCountries();
@@ -567,6 +685,28 @@ const ProjectTable = () => {
   };
   return (
     <div style={{ maxWidth: '100%', overflowX: 'hidden' }}>
+      <button
+        style={{
+          position: 'fixed',
+          top: '92px',
+          right: '16px',
+          zIndex: 1100,
+          background:
+            'linear-gradient(135deg, #3b82f6 0%, #6366f1 55%, #0ea5a4 100%)',
+          color: '#ffffff',
+          border: 'none',
+          borderRadius: '10px',
+          padding: '10px 14px',
+          fontWeight: 700,
+          boxShadow: '0 6px 14px rgba(59, 130, 246, 0.28)',
+          cursor: 'pointer'
+        }}
+        onClick={async () => {
+          await exportProjectsExcel(serializeFilters(), sortKey, order);
+        }}
+      >
+        Export Data
+      </button>
       <Toolbar>
         <ActionButton
           onClick={() => {
@@ -604,16 +744,47 @@ const ProjectTable = () => {
       </ControlRow>
       <ControlRow>
         <label>Sort by:</label>
-        <select onChange={(e) => setSortKey(e.target.value)}>
+        <select
+          value={sortKey}
+          onChange={(e) => {
+            const nextSortKey = e.target.value;
+            setSortKey(nextSortKey);
+            localStorage.setItem(
+              'projectTableState',
+              JSON.stringify({
+                filters,
+                sortKey: nextSortKey,
+                order,
+                pageSize
+              })
+            );
+          }}
+        >
           <option value="id">ID</option>
           <option value="name">Name</option>
+          <option value="city">City</option>
           <option value="expectedDate">Date</option>
           <option value="buildingHeightMeters">Height (m)</option>
           <option value="buildingHeightFloors">Height (floors)</option>
           <option value="lastVerifiedDate">Last verified date</option>
         </select>
         <label>Order:</label>
-        <select onChange={(e) => setOrder(e.target.value as 'asc' | 'desc')}>
+        <select
+          value={order}
+          onChange={(e) => {
+            const nextOrder = e.target.value as 'asc' | 'desc';
+            setOrder(nextOrder);
+            localStorage.setItem(
+              'projectTableState',
+              JSON.stringify({
+                filters,
+                sortKey,
+                order: nextOrder,
+                pageSize
+              })
+            );
+          }}
+        >
           <option value="asc">Ascending</option>
           <option value="desc">Descending</option>
         </select>
@@ -628,12 +799,65 @@ const ProjectTable = () => {
 
         <FilterGrid>
           <FilterField>
+            <label>Country</label>
+            <DropdownCheckbox
+              options={countryList.map((c) => c.name)}
+              selected={filterDraft.country}
+              onChange={(countryArr) => {
+                const allowedMetroAreas = new Set(
+                  getMetroOptionsForCountries(countryArr)
+                );
+                const prunedMetroAreas = filterDraft.metroArea.filter((metro) =>
+                  allowedMetroAreas.has(metro)
+                );
+                const allowedCities = new Set(
+                  getCityOptionsForMetros(prunedMetroAreas, countryArr)
+                );
+                const prunedCities = filterDraft.city.filter((cityName) =>
+                  allowedCities.has(cityName)
+                );
+
+                syncFilters({
+                  ...filterDraft,
+                  country: countryArr,
+                  metroArea: prunedMetroAreas,
+                  city: prunedCities
+                });
+              }}
+              label="Select country"
+            />
+          </FilterField>
+
+          <FilterField>
+            <label>Metro Area</label>
+            <DropdownCheckbox
+              options={filteredMetroAreaOptions}
+              selected={filterDraft.metroArea}
+              onChange={(metroAreaArr) => {
+                const allowedCities = new Set(
+                  getCityOptionsForMetros(metroAreaArr, filterDraft.country)
+                );
+                const prunedCities = filterDraft.city.filter((cityName) =>
+                  allowedCities.has(cityName)
+                );
+
+                syncFilters({
+                  ...filterDraft,
+                  metroArea: metroAreaArr,
+                  city: prunedCities
+                });
+              }}
+              label="Select metro area"
+            />
+          </FilterField>
+
+          <FilterField>
             <label>City</label>
             <DropdownCheckbox
-              options={((cities as unknown as City[]) ?? []).map((c) => c.name)}
+              options={filteredCityOptions}
               selected={filterDraft.city}
               onChange={(cityArr) =>
-                setFilterDraft((prev) => ({ ...prev, city: cityArr }))
+                syncFilters({ ...filterDraft, city: cityArr })
               }
               label="Select city"
             />
@@ -645,37 +869,9 @@ const ProjectTable = () => {
               options={statuses}
               selected={filterDraft.status}
               onChange={(statusArr) =>
-                setFilterDraft((prev) => ({ ...prev, status: statusArr }))
+                syncFilters({ ...filterDraft, status: statusArr })
               }
               label="Select status"
-            />
-          </FilterField>
-
-          <FilterField>
-            <label>Metro Area</label>
-            <DropdownCheckbox
-              options={((metroAreas as unknown as MetroArea[]) ?? []).map(
-                (m) => m.name
-              )}
-              selected={filterDraft.metroArea}
-              onChange={(metroAreaArr) =>
-                setFilterDraft((prev) => ({ ...prev, metroArea: metroAreaArr }))
-              }
-              label="Select metro area"
-            />
-          </FilterField>
-
-          <FilterField>
-            <label>Country</label>
-            <DropdownCheckbox
-              options={((countries as unknown as Country[]) ?? []).map(
-                (c) => c.name
-              )}
-              selected={filterDraft.country}
-              onChange={(countryArr) =>
-                setFilterDraft((prev) => ({ ...prev, country: countryArr }))
-              }
-              label="Select country"
             />
           </FilterField>
 
@@ -687,10 +883,7 @@ const ProjectTable = () => {
               )}
               selected={filterDraft.buildingType}
               onChange={(buildingTypeArr) =>
-                setFilterDraft((prev) => ({
-                  ...prev,
-                  buildingType: buildingTypeArr
-                }))
+                syncFilters({ ...filterDraft, buildingType: buildingTypeArr })
               }
               label="Select building type"
             />
@@ -704,10 +897,7 @@ const ProjectTable = () => {
               )}
               selected={filterDraft.buildingUse}
               onChange={(buildingUseArr) =>
-                setFilterDraft((prev) => ({
-                  ...prev,
-                  buildingUse: buildingUseArr
-                }))
+                syncFilters({ ...filterDraft, buildingUse: buildingUseArr })
               }
               label="Select building use"
             />
@@ -720,10 +910,7 @@ const ProjectTable = () => {
               placeholder="Min Budget"
               value={filterDraft.minBudget}
               onChange={(e) =>
-                setFilterDraft((prev) => ({
-                  ...prev,
-                  minBudget: e.target.value
-                }))
+                syncFilters({ ...filterDraft, minBudget: e.target.value })
               }
             />
           </FilterField>
@@ -735,10 +922,7 @@ const ProjectTable = () => {
               placeholder="Max Budget"
               value={filterDraft.maxBudget}
               onChange={(e) =>
-                setFilterDraft((prev) => ({
-                  ...prev,
-                  maxBudget: e.target.value
-                }))
+                syncFilters({ ...filterDraft, maxBudget: e.target.value })
               }
             />
           </FilterField>
@@ -750,10 +934,7 @@ const ProjectTable = () => {
               placeholder="Min Height (m)"
               value={filterDraft.minHeightMeters}
               onChange={(e) =>
-                setFilterDraft((prev) => ({
-                  ...prev,
-                  minHeightMeters: e.target.value
-                }))
+                syncFilters({ ...filterDraft, minHeightMeters: e.target.value })
               }
             />
           </FilterField>
@@ -765,10 +946,7 @@ const ProjectTable = () => {
               placeholder="Max Height (m)"
               value={filterDraft.maxHeightMeters}
               onChange={(e) =>
-                setFilterDraft((prev) => ({
-                  ...prev,
-                  maxHeightMeters: e.target.value
-                }))
+                syncFilters({ ...filterDraft, maxHeightMeters: e.target.value })
               }
             />
           </FilterField>
@@ -779,10 +957,7 @@ const ProjectTable = () => {
               type="date"
               value={filterDraft.firstDate}
               onChange={(e) =>
-                setFilterDraft((prev) => ({
-                  ...prev,
-                  firstDate: e.target.value
-                }))
+                syncFilters({ ...filterDraft, firstDate: e.target.value })
               }
             />
           </FilterField>
@@ -793,10 +968,7 @@ const ProjectTable = () => {
               type="date"
               value={filterDraft.lastDate}
               onChange={(e) =>
-                setFilterDraft((prev) => ({
-                  ...prev,
-                  lastDate: e.target.value
-                }))
+                syncFilters({ ...filterDraft, lastDate: e.target.value })
               }
             />
           </FilterField>
@@ -805,24 +977,7 @@ const ProjectTable = () => {
         <FilterActions>
           <ActionButton
             onClick={() => {
-              setPage(1);
-              setFilters(filterDraft);
-              localStorage.setItem(
-                'projectTableState',
-                JSON.stringify({
-                  filters: filterDraft,
-                  sortKey,
-                  order,
-                  pageSize
-                })
-              );
-            }}
-          >
-            Set Filters
-          </ActionButton>
-          <ActionButton
-            onClick={() => {
-              setFilters({
+              const clearedFilters = {
                 city: [],
                 status: [],
                 metroArea: [],
@@ -835,24 +990,8 @@ const ProjectTable = () => {
                 maxHeightMeters: '',
                 firstDate: '',
                 lastDate: ''
-              });
-              // Optionally fetch all projects after clearing
-              getProjectsSimple('', sortKey, order, pageSize, page);
-              setFilterDraft({
-                city: [],
-                status: [],
-                metroArea: [],
-                country: [],
-                buildingType: [],
-                buildingUse: [],
-                minBudget: '',
-                maxBudget: '',
-                minHeightMeters: '',
-                maxHeightMeters: '',
-                firstDate: '',
-                lastDate: ''
-              });
-              localStorage.removeItem('projectTableState');
+              };
+              syncFilters(clearedFilters);
             }}
           >
             Clear Filters

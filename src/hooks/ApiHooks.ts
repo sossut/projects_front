@@ -149,6 +149,56 @@ const useProjects = () => {
     );
   };
 
+  const exportProjectsExcel = async (
+    filters?: string,
+    sortBy?: string,
+    order?: string
+  ) => {
+    try {
+      const response = await fetch(
+        `${baseUrl}/projects/simple/export/excel?${filters ?? ''}${sortBy ? `&sortBy=${encodeURIComponent(sortBy)}` : ''}${order ? `&order=${encodeURIComponent(order)}` : ''}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new ApiError(
+          message || `Request failed with status ${response.status}`,
+          response.status
+        );
+      }
+
+      const blob = await response.blob();
+      const contentDisposition =
+        response.headers.get('content-disposition') || '';
+      const fileNameMatch = contentDisposition.match(
+        /filename\*?=(?:UTF-8''|\")?([^\";]+)/i
+      );
+      const fileName = fileNameMatch?.[1]
+        ? decodeURIComponent(fileNameMatch[1].replace(/\"/g, '').trim())
+        : 'projects-export.xlsx';
+
+      const objectUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    }
+  };
+
   const updateProjectInList = (updatedProject: Project) => {
     const updatedId = updatedProject.id;
     if (updatedId === undefined || updatedId === null) {
@@ -268,6 +318,30 @@ const useProjects = () => {
           }
         }
       );
+      setProjectNames(data);
+      return data;
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getProjectNamesByCountry = async (countryId: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`getProjectNamesByCountry: countryId=${countryId}`);
+      const data = await fetchJson(`${baseUrl}/projects/country/${countryId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
       setProjectNames(data);
       return data;
     } catch (e) {
@@ -575,9 +649,11 @@ const useProjects = () => {
     projectNames,
     getProjects,
     getProjectsSimple,
+    exportProjectsExcel,
     getProjectCount,
     getProject,
     getProjectNamesByMetroAreaAndBuildingType,
+    getProjectNamesByCountry,
     getProjectsBySearch,
     getProjectSimpleById,
     getProjectsCoordinates,

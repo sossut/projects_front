@@ -26,6 +26,7 @@ const MetroAreasForAutoUpdates: React.FC = () => {
   } = useMetroAreas();
   const { countries, getCountries } = useCountries();
   const [sortedAreas, setSortedAreas] = React.useState<MetroArea[]>([]);
+  const [searchTerm, setSearchTerm] = React.useState('');
   const [isModalOpen, setIsModalOpen] = React.useState<
     'edit' | 'startUpdate' | 'copyJson' | false
   >(false);
@@ -63,6 +64,15 @@ const MetroAreasForAutoUpdates: React.FC = () => {
     setSortedAreas(sort);
   }, [metroAreas]);
 
+  const filteredAreas = sortedAreas.filter((area) => {
+    const countryName = area.countryName || area.country?.name || '';
+    const normalizedSearch = searchTerm.toLowerCase();
+    return (
+      area.name.toLowerCase().includes(normalizedSearch) ||
+      countryName.toLowerCase().includes(normalizedSearch)
+    );
+  });
+
   const handleAddMetroArea = async () => {
     const { countryId, name } = newMetroArea;
     if (!countryId || !name) return;
@@ -86,6 +96,14 @@ const MetroAreasForAutoUpdates: React.FC = () => {
     <div style={{ flex: 1, minWidth: 0 }}>
       <div style={{ height: '120px' }}>
         <h2>Metro Areas for Auto Updates</h2>
+        <input
+          type="text"
+          placeholder="Search metro areas or countries"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ marginBottom: '8px', width: '100%', maxWidth: '320px' }}
+        />
+        <br />
         <label>Add new metro area</label>
         <select
           value={newMetroArea.countryId ?? ''}
@@ -142,7 +160,7 @@ const MetroAreasForAutoUpdates: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {sortedAreas.map((area) => (
+          {filteredAreas.map((area) => (
             <tr key={area.id}>
               <td>{area.countryName || area.country?.name}</td>
               <td>{area.name}</td>
