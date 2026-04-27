@@ -500,9 +500,18 @@ const ProjectTable = () => {
     );
   };
 
-  const countryList = (countries as unknown as Country[]) ?? [];
-  const metroAreaList = (metroAreas as unknown as MetroArea[]) ?? [];
-  const cityList = (cities as unknown as City[]) ?? [];
+  const countryList = React.useMemo(
+    () => (countries as unknown as Country[]) ?? [],
+    [countries]
+  );
+  const metroAreaList = React.useMemo(
+    () => (metroAreas as unknown as MetroArea[]) ?? [],
+    [metroAreas]
+  );
+  const cityList = React.useMemo(
+    () => (cities as unknown as City[]) ?? [],
+    [cities]
+  );
 
   const countryNameById = React.useMemo(() => {
     const countryMap = new Map<number, string>();
@@ -512,30 +521,38 @@ const ProjectTable = () => {
     return countryMap;
   }, [countryList]);
 
-  const getMetroAreaCountryName = (metroArea: MetroArea) => {
-    return (
-      metroArea.country?.name ||
-      metroArea.countryName ||
-      countryNameById.get(Number(metroArea.countryId)) ||
-      ''
-    );
-  };
+  const getMetroAreaCountryName = React.useCallback(
+    (metroArea: MetroArea) => {
+      return (
+        metroArea.country?.name ||
+        metroArea.countryName ||
+        countryNameById.get(Number(metroArea.countryId)) ||
+        ''
+      );
+    },
+    [countryNameById]
+  );
 
-  const getMetroOptionsForCountries = (selectedCountries: string[]) => {
-    if (selectedCountries.length === 0) {
-      return metroAreaList.map((metroArea) => metroArea.name);
-    }
+  const getMetroOptionsForCountries = React.useCallback(
+    (selectedCountries: string[]) => {
+      if (selectedCountries.length === 0) {
+        return metroAreaList.map((metroArea) => metroArea.name);
+      }
 
-    const selectedCountrySet = new Set(
-      selectedCountries.map((countryName) => countryName.toLowerCase())
-    );
+      const selectedCountrySet = new Set(
+        selectedCountries.map((countryName) => countryName.toLowerCase())
+      );
 
-    return metroAreaList
-      .filter((metroArea) =>
-        selectedCountrySet.has(getMetroAreaCountryName(metroArea).toLowerCase())
-      )
-      .map((metroArea) => metroArea.name);
-  };
+      return metroAreaList
+        .filter((metroArea) =>
+          selectedCountrySet.has(
+            getMetroAreaCountryName(metroArea).toLowerCase()
+          )
+        )
+        .map((metroArea) => metroArea.name);
+    },
+    [metroAreaList, getMetroAreaCountryName]
+  );
 
   const metroAreaNameById = React.useMemo(() => {
     const metroMap = new Map<number, string>();
@@ -545,61 +562,64 @@ const ProjectTable = () => {
     return metroMap;
   }, [metroAreaList]);
 
-  const getCityMetroAreaName = (city: City) => {
-    if (typeof city.metroAreaId === 'object' && city.metroAreaId !== null) {
-      return city.metroAreaId.name;
-    }
-    return metroAreaNameById.get(Number(city.metroAreaId)) || '';
-  };
+  const getCityMetroAreaName = React.useCallback(
+    (city: City) => {
+      if (typeof city.metroAreaId === 'object' && city.metroAreaId !== null) {
+        return city.metroAreaId.name;
+      }
+      return metroAreaNameById.get(Number(city.metroAreaId)) || '';
+    },
+    [metroAreaNameById]
+  );
 
-  const getCityOptionsForMetros = (
-    selectedMetros: string[],
-    selectedCountries: string[]
-  ) => {
-    if (selectedMetros.length > 0) {
-      const selectedMetroSet = new Set(
-        selectedMetros.map((metroName) => metroName.toLowerCase())
-      );
+  const getCityOptionsForMetros = React.useCallback(
+    (selectedMetros: string[], selectedCountries: string[]) => {
+      if (selectedMetros.length > 0) {
+        const selectedMetroSet = new Set(
+          selectedMetros.map((metroName) => metroName.toLowerCase())
+        );
 
-      return cityList
-        .filter((city) =>
-          selectedMetroSet.has(getCityMetroAreaName(city).toLowerCase())
-        )
-        .map((city) => city.name);
-    }
+        return cityList
+          .filter((city) =>
+            selectedMetroSet.has(getCityMetroAreaName(city).toLowerCase())
+          )
+          .map((city) => city.name);
+      }
 
-    if (selectedCountries.length > 0) {
-      const selectedCountrySet = new Set(
-        selectedCountries.map((countryName) => countryName.toLowerCase())
-      );
+      if (selectedCountries.length > 0) {
+        const selectedCountrySet = new Set(
+          selectedCountries.map((countryName) => countryName.toLowerCase())
+        );
 
-      return cityList
-        .filter((city) => {
-          const metroAreaName = getCityMetroAreaName(city);
-          const metroArea = metroAreaList.find(
-            (metro) => metro.name === metroAreaName
-          );
-          if (!metroArea) {
-            return false;
-          }
-          return selectedCountrySet.has(
-            getMetroAreaCountryName(metroArea).toLowerCase()
-          );
-        })
-        .map((city) => city.name);
-    }
+        return cityList
+          .filter((city) => {
+            const metroAreaName = getCityMetroAreaName(city);
+            const metroArea = metroAreaList.find(
+              (metro) => metro.name === metroAreaName
+            );
+            if (!metroArea) {
+              return false;
+            }
+            return selectedCountrySet.has(
+              getMetroAreaCountryName(metroArea).toLowerCase()
+            );
+          })
+          .map((city) => city.name);
+      }
 
-    return cityList.map((city) => city.name);
-  };
+      return cityList.map((city) => city.name);
+    },
+    [cityList, getCityMetroAreaName, metroAreaList, getMetroAreaCountryName]
+  );
 
   const filteredMetroAreaOptions = React.useMemo(
     () => getMetroOptionsForCountries(filterDraft.country),
-    [filterDraft.country, metroAreaList]
+    [filterDraft.country, getMetroOptionsForCountries]
   );
 
   const filteredCityOptions = React.useMemo(
     () => getCityOptionsForMetros(filterDraft.metroArea, filterDraft.country),
-    [filterDraft.metroArea, filterDraft.country, cityList, metroAreaNameById]
+    [filterDraft.metroArea, filterDraft.country, getCityOptionsForMetros]
   );
 
   React.useEffect(() => {
@@ -1087,7 +1107,7 @@ const ProjectTable = () => {
               <TH style={{ width: 138 }}>Name</TH>
               <TH style={{ width: 78 }}>City</TH>
               <TH style={{ width: 78 }}>Country</TH>
-              <TH style={{ width: 78 }}>Status</TH>
+              <TH style={{ width: 82 }}>Status</TH>
               <TH style={{ width: 72 }}>Type</TH>
               <TH style={{ width: 96 }}>Uses</TH>
               <TH style={{ width: 42 }}>m</TH>
