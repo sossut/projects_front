@@ -176,9 +176,11 @@ const useProjects = () => {
       const contentDisposition =
         response.headers.get('content-disposition') || '';
       const fileNameMatch = contentDisposition.match(
+        // eslint-disable-next-line no-useless-escape
         /filename\*?=(?:UTF-8''|\")?([^\";]+)/i
       );
       const fileName = fileNameMatch?.[1]
+        // eslint-disable-next-line no-useless-escape
         ? decodeURIComponent(fileNameMatch[1].replace(/\"/g, '').trim())
         : 'projects-export.xlsx';
 
