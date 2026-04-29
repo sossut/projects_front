@@ -961,8 +961,8 @@ const useEnrichment = () => {
 
   const waitForEnrichmentJobTerminalStatus = async (
     jobId: number | string,
-    intervalMs = 5000,
-    timeoutMs = 15 * 60 * 1000
+    intervalMs = 10000,
+    timeoutMs = 25 * 60 * 1000
   ) => {
     const startedAt = Date.now();
 

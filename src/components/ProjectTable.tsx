@@ -8,11 +8,13 @@ import {
   useCountries,
   useMetroAreas,
   useBuildingUses,
-  useBuildingTypes
+  useBuildingTypes,
+  useEnrichment
 } from '../hooks/ApiHooks';
 import type { BuildingUse } from '../interfaces/BuildingUse';
 import ProjectInfoModal from './ProjectInfoModal';
 import ProjectImageModal from './ProjectImageModal';
+import EnrichmentConfirmationModal from './EnrichmentConfirmationModal';
 import type { City } from '../interfaces/City';
 import DropdownCheckbox from './DropdownCheckbox';
 import type { MetroArea } from '../interfaces/MetroArea';
@@ -92,15 +94,35 @@ const Toolbar = styled.div`
 `;
 
 const ActionButton = styled.button`
-  padding: 0.55rem 0.8rem;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.9rem;
+  border: none;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.18);
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.22);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
 
   @media (max-width: 1440px) {
-    padding: 0.45rem 0.65rem;
+    padding: 0.4rem 0.6rem;
     font-size: 0.85rem;
   }
 
   @media (max-width: 1280px) {
-    padding: 0.4rem 0.55rem;
+    padding: 0.35rem 0.5rem;
     font-size: 0.8rem;
   }
 `;
@@ -306,15 +328,28 @@ const StatusIcon = styled.img`
 `;
 
 const ActionCell = styled(TD)`
-  width: 34px;
+  width: 60px;
   white-space: nowrap;
   text-align: center;
+  padding: 0;
+  vertical-align: stretch;
+`;
+
+const ActionButtonsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 8px 0;
 `;
 
 const InfoButton = styled.button`
-  width: 100%;
-  padding: 0.2rem 0.25rem;
-  font-size: 0.62rem;
+  flex: 1;
+  min-width: 45px;
+  padding: 0.3rem 0.2rem;
+  font-size: 0.6rem;
   line-height: 1;
   display: inline-flex;
   flex-direction: column;
@@ -322,25 +357,97 @@ const InfoButton = styled.button`
   justify-content: center;
   gap: 1px;
   white-space: normal;
+  border: none;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+
+  &:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+    transform: translateY(-1px);
+  }
 
   @media (min-width: 1600px) {
-    padding: 0.25rem 0.35rem;
-    font-size: 0.68rem;
+    padding: 0.35rem 0.25rem;
+    font-size: 0.65rem;
   }
 
   @media (max-width: 1440px) {
-    padding: 0.2rem 0.3rem;
-    font-size: 0.64rem;
+    padding: 0.3rem 0.2rem;
+    font-size: 0.58rem;
   }
 
   @media (max-width: 1280px) {
-    padding: 0.18rem 0.28rem;
-    font-size: 0.6rem;
+    padding: 0.25rem 0.15rem;
+    font-size: 0.55rem;
+  }
+`;
+
+const EnrichButton = styled(InfoButton)<{ isLoading?: boolean }>`
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+  }
+
+  &:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+  }
+`;
+
+const Spinner = styled.div`
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;
 
 const CompactTextCell = styled(TD)`
   white-space: normal;
+`;
+
+const ExportButton = styled(ActionButton)`
+  position: fixed;
+  top: 92px;
+  right: 16px;
+  z-index: 1100;
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 55%, #0ea5a4 100%);
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.28);
+`;
+
+const PaginationButton = styled(ActionButton)`
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  padding: 0.35rem 0.6rem;
+  font-weight: 700;
+`;
+
+const PaginationContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 12px 0;
 `;
 
 const CenterCell = styled(TD)`
@@ -383,6 +490,11 @@ const ProjectTable = () => {
   const { metroAreas, getMetroAreas } = useMetroAreas();
   const { buildingUses, getBuildingUses } = useBuildingUses();
   const { buildingTypes, getBuildingTypes } = useBuildingTypes();
+  const {
+    startEnrichmentForProject,
+    waitForEnrichmentJobTerminalStatus,
+    clearEnrichmentInFlight
+  } = useEnrichment();
 
   const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
   const [selectedImageDate, setSelectedImageDate] = React.useState<
@@ -416,8 +528,14 @@ const ProjectTable = () => {
   const [pageSize, setPageSize] = useState(100);
   const [pageCount, setPageCount] = useState(1);
   const [restored, setRestored] = useState(false);
+  const [enrichmentModalOpen, setEnrichmentModalOpen] = React.useState(false);
+  const [projectToEnrich, setProjectToEnrich] = React.useState<Project | null>(
+    null
+  );
+  const [enrichmentLoading, setEnrichmentLoading] = React.useState(false);
 
-  const { user } = React.useContext(AppContext);
+  const { user, enrichingProjectId, setEnrichingProjectId } =
+    React.useContext(AppContext);
   const storedUser = React.useMemo(() => {
     try {
       const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -469,6 +587,70 @@ const ProjectTable = () => {
     console.log(fullProject);
     setSelectedProject(fullProject);
     setIsModalOpen('info');
+  };
+
+  const handleEnrichClick = (project: Project) => {
+    setProjectToEnrich(project);
+    setEnrichmentModalOpen(true);
+  };
+
+  const handleEnrichmentConfirm = async () => {
+    if (!projectToEnrich?.id) return;
+
+    setEnrichmentLoading(true);
+    try {
+      const projectId = projectToEnrich.id as number;
+      setEnrichingProjectId(projectId);
+      console.log(
+        `Starting enrichment for project: ${projectToEnrich?.name} (ID: ${projectId})`
+      );
+      const job = await startEnrichmentForProject(projectId);
+      console.log('Enrichment job started:', job);
+      const jobId =
+        (job as { jobId?: number | string; id?: number | string } | undefined)
+          ?.jobId ??
+        (job as { jobId?: number | string; id?: number | string } | undefined)
+          ?.id;
+
+      if (!jobId) {
+        alert('Could not start enrichment: missing job id');
+        setEnrichmentModalOpen(false);
+        setEnrichingProjectId(null);
+        return;
+      }
+
+      setEnrichmentModalOpen(false);
+      alert(
+        `Enrichment job started, job ID: ${jobId} for project ${projectToEnrich?.name}`
+      );
+
+      const result = await waitForEnrichmentJobTerminalStatus(
+        jobId,
+        10000,
+        25 * 60 * 1000
+      );
+      const refreshedProject = await getProjectFormatted(projectId);
+      if (refreshedProject) {
+        updateProjectInList(refreshedProject);
+      }
+
+      if (result.status === 'completed') {
+        alert(`Enrichment completed for ${projectToEnrich.name}`);
+      } else {
+        alert(`Enrichment failed for ${projectToEnrich.name}`);
+      }
+    } catch (e) {
+      const message =
+        e instanceof Error ? e.message : 'Failed to start enrichment';
+      alert(message);
+      console.error('Enrichment flow failed:', e);
+    } finally {
+      if (projectToEnrich?.id) {
+        clearEnrichmentInFlight(projectToEnrich.id as number);
+        setEnrichingProjectId(null);
+      }
+      setEnrichmentLoading(false);
+    }
   };
 
   const serializeFilters = () => {
@@ -705,28 +887,13 @@ const ProjectTable = () => {
   };
   return (
     <div style={{ maxWidth: '100%', overflowX: 'hidden' }}>
-      <button
-        style={{
-          position: 'fixed',
-          top: '92px',
-          right: '16px',
-          zIndex: 1100,
-          background:
-            'linear-gradient(135deg, #3b82f6 0%, #6366f1 55%, #0ea5a4 100%)',
-          color: '#ffffff',
-          border: 'none',
-          borderRadius: '10px',
-          padding: '10px 14px',
-          fontWeight: 700,
-          boxShadow: '0 6px 14px rgba(59, 130, 246, 0.28)',
-          cursor: 'pointer'
-        }}
+      <ExportButton
         onClick={async () => {
           await exportProjectsExcel(serializeFilters(), sortKey, order);
         }}
       >
         Export Data
-      </button>
+      </ExportButton>
       <Toolbar>
         <ActionButton
           onClick={() => {
@@ -1018,8 +1185,8 @@ const ProjectTable = () => {
           </ActionButton>
         </FilterActions>
       </FilterPanel>
-      <div>
-        <button
+      <PaginationContainer>
+        <PaginationButton
           onClick={() => {
             setPage((prev) => Math.max(prev - 1, 1));
             getProjectsSimple(
@@ -1032,11 +1199,11 @@ const ProjectTable = () => {
           }}
         >
           Previous
-        </button>
+        </PaginationButton>
         <span>
           Page {page} of {pageCount}
         </span>
-        <button
+        <PaginationButton
           onClick={() => {
             setPage((prev) => prev + 1);
             getProjectsSimple(
@@ -1050,7 +1217,7 @@ const ProjectTable = () => {
           disabled={page >= pageCount}
         >
           Next
-        </button>
+        </PaginationButton>
         <label>Page Size:</label>
         <select
           value={pageSize}
@@ -1063,7 +1230,7 @@ const ProjectTable = () => {
           <option value={100}>100</option>
           <option value={200}>200</option>
         </select>
-        <button
+        <PaginationButton
           onClick={() => {
             setPage(1);
             getProjectsSimple(
@@ -1076,13 +1243,13 @@ const ProjectTable = () => {
           }}
         >
           Set Page Size
-        </button>
-      </div>
+        </PaginationButton>
+      </PaginationContainer>
       <div style={{ margin: '16px 0' }}>
         Total projects with these filters: {projectCount}
       </div>
       <div style={{ margin: '16px 0' }}>
-        <button
+        <ActionButton
           onClick={() => {
             getProjectsSimple(
               serializeFilters(),
@@ -1095,7 +1262,7 @@ const ProjectTable = () => {
           }}
         >
           Refresh
-        </button>
+        </ActionButton>
       </div>
       <TableWrap>
         <Table>
@@ -1114,7 +1281,7 @@ const ProjectTable = () => {
               <TH style={{ width: 32 }}>Floors</TH>
               <TH style={{ width: 88 }}>Expected</TH>
               <TH style={{ width: 292 }}>Images</TH>
-              <TH style={{ width: 20 }}>Info</TH>
+              <TH style={{ width: 60 }}>Actions</TH>
             </tr>
           </THead>
           <tbody>
@@ -1216,14 +1383,31 @@ const ProjectTable = () => {
                   </MediaList>
                 </MediaCell>
                 <ActionCell>
-                  <InfoButton
-                    onClick={() => {
-                      handleEdit(project.id as number);
-                    }}
-                  >
-                    <span>More</span>
-                    <span>Info</span>
-                  </InfoButton>
+                  <ActionButtonsContainer>
+                    <InfoButton
+                      onClick={() => {
+                        handleEdit(project.id as number);
+                      }}
+                    >
+                      <span>More</span>
+                      <span>Info</span>
+                    </InfoButton>
+                    <EnrichButton
+                      onClick={() => {
+                        handleEnrichClick(project);
+                      }}
+                      disabled={enrichingProjectId === project.id}
+                    >
+                      {enrichingProjectId === project.id ? (
+                        <>
+                          <Spinner />
+                          <span>Enriching...</span>
+                        </>
+                      ) : (
+                        <span>Enrich</span>
+                      )}
+                    </EnrichButton>
+                  </ActionButtonsContainer>
                 </ActionCell>
               </tr>
             ))}
@@ -1253,66 +1437,17 @@ const ProjectTable = () => {
           goNext={goNextProject}
         />
       )}
-      <div>
-        <button
-          onClick={() => {
-            setPage((prev) => Math.max(prev - 1, 1));
-            getProjectsSimple(
-              serializeFilters(),
-              sortKey,
-              order,
-              pageSize,
-              Math.max(page - 1, 1)
-            );
+      {enrichmentModalOpen && projectToEnrich && (
+        <EnrichmentConfirmationModal
+          projectName={projectToEnrich.name || 'Unknown Project'}
+          onConfirm={handleEnrichmentConfirm}
+          onCancel={() => {
+            setEnrichmentModalOpen(false);
+            setProjectToEnrich(null);
           }}
-        >
-          Previous
-        </button>
-        <span>
-          Page {page} of {pageCount}
-        </span>
-        <button
-          onClick={() => {
-            setPage((prev) => prev + 1);
-            getProjectsSimple(
-              serializeFilters(),
-              sortKey,
-              order,
-              pageSize,
-              page + 1
-            );
-          }}
-          disabled={page >= pageCount}
-        >
-          Next
-        </button>
-        <label>Page Size:</label>
-        <select
-          value={pageSize}
-          onChange={(e) => setPageSize(Number(e.target.value))}
-        >
-          <option value={2}>2</option>
-          <option value={10}>10</option>
-          <option value={25}>25</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-          <option value={200}>200</option>
-        </select>
-        <button
-          onClick={() => {
-            setPage(1);
-            getProjectsSimple(
-              serializeFilters(),
-              sortKey,
-              order,
-              Number(pageSize),
-              1
-            );
-          }}
-        >
-          Set Page Size
-        </button>
-      </div>
+          isLoading={enrichmentLoading}
+        />
+      )}
     </div>
   );
 };

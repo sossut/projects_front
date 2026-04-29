@@ -9,6 +9,7 @@ import ProjectModalOptionsMenu from './ProjectModalOptionsMenu';
 import ProjectViewJson from './ProjectViewJson';
 import type { MetroArea } from '../interfaces/MetroArea';
 import { useEnrichment, useProjects } from '../hooks/ApiHooks';
+import { AppContext } from '../contexts/AppContext';
 interface ProjectInfoModalProps {
   selectedProject: Project | null;
   onClose: () => void;
@@ -63,6 +64,7 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
   );
   const [showOptions, setShowOptions] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
+  const { setEnrichingProjectId } = React.useContext(AppContext);
   const {
     startEnrichmentForProject,
     waitForEnrichmentJobTerminalStatus,
@@ -78,6 +80,7 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
       )
     ) {
       try {
+        setEnrichingProjectId(projectId as number);
         console.log(
           `Starting enrichment for project: ${selectedProject?.name} (ID: ${projectId})`
         );
@@ -91,6 +94,7 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
 
         if (!jobId || !selectedProject?.id) {
           alert('Could not start enrichment: missing job id');
+          setEnrichingProjectId(null);
           return;
         }
 
@@ -99,7 +103,11 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
         );
         onClose();
 
-        const result = await waitForEnrichmentJobTerminalStatus(jobId, 5000);
+        const result = await waitForEnrichmentJobTerminalStatus(
+          jobId,
+          10000,
+          25 * 60 * 1000
+        );
         const refreshedProject = await getProjectFormatted(selectedProject.id);
         if (refreshedProject) {
           onProjectUpdate(refreshedProject);
@@ -118,6 +126,7 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
       } finally {
         if (projectId) {
           clearEnrichmentInFlight(projectId);
+          setEnrichingProjectId(null);
         }
       }
     }
