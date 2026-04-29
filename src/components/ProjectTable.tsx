@@ -1261,20 +1261,6 @@ const ProjectTable = () => {
           <option value={100}>100</option>
           <option value={200}>200</option>
         </select>
-        <PaginationButton
-          onClick={() => {
-            setPage(1);
-            getProjectsSimple(
-              serializeFilters(),
-              sortKey,
-              order,
-              Number(pageSize),
-              1
-            );
-          }}
-        >
-          Set Page Size
-        </PaginationButton>
       </PaginationContainer>
       <div style={{ margin: '16px 0' }}>
         Total projects with these filters: {projectCount}

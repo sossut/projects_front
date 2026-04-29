@@ -19,6 +19,33 @@ const DropdownLabel = styled.span`
   color: black;
 `;
 
+const TriggerButton = styled.button<{ active?: boolean }>`
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  background: ${({ active }) =>
+    active
+      ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+      : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'};
+  box-shadow: ${({ active }) =>
+    active
+      ? '0 6px 14px rgba(16, 185, 129, 0.2)'
+      : '0 6px 14px rgba(59, 130, 246, 0.18)'};
+  transition: all 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${({ active }) =>
+      active
+        ? '0 8px 20px rgba(16, 185, 129, 0.24)'
+        : '0 8px 20px rgba(59, 130, 246, 0.22)'};
+  }
+`;
+
 const DropdownCheckbox: React.FC<DropdownCheckboxProps> = ({
   options,
   selected,
@@ -49,9 +76,13 @@ const DropdownCheckbox: React.FC<DropdownCheckboxProps> = ({
         display: 'inline-block'
       }}
     >
-      <button type="button" onClick={() => setOpen((o) => !o)}>
+      <TriggerButton
+        type="button"
+        active={selected.length > 0}
+        onClick={() => setOpen((o) => !o)}
+      >
         {label} {selected.length > 0 ? `(${selected.length})` : ''}
-      </button>
+      </TriggerButton>
       {open && (
         <input
           type="text"
