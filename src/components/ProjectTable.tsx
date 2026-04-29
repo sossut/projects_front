@@ -423,17 +423,32 @@ const CompactTextCell = styled(TD)`
   white-space: normal;
 `;
 
-const ExportButton = styled(ActionButton)`
+const TopActionButton = styled(ActionButton)`
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 10px;
+`;
+
+const ExportButton = styled(TopActionButton)`
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 55%, #0ea5a4 100%);
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.28);
+`;
+
+const TopActionBar = styled.div`
   position: fixed;
   top: 92px;
   right: 16px;
   z-index: 1100;
-  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 55%, #0ea5a4 100%);
-  color: #ffffff;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-weight: 700;
-  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.28);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+`;
+
+const RefreshButton = styled(TopActionButton)`
+  background: linear-gradient(135deg, #10b981 0%, #22c55e 52%, #0ea5a4 100%);
+  box-shadow: 0 6px 14px rgba(16, 185, 129, 0.28);
 `;
 
 const PaginationButton = styled(ActionButton)`
@@ -887,13 +902,29 @@ const ProjectTable = () => {
   };
   return (
     <div style={{ maxWidth: '100%', overflowX: 'hidden' }}>
-      <ExportButton
-        onClick={async () => {
-          await exportProjectsExcel(serializeFilters(), sortKey, order);
-        }}
-      >
-        Export Data
-      </ExportButton>
+      <TopActionBar>
+        <ExportButton
+          onClick={async () => {
+            await exportProjectsExcel(serializeFilters(), sortKey, order);
+          }}
+        >
+          Export Data
+        </ExportButton>
+        <RefreshButton
+          onClick={() => {
+            getProjectsSimple(
+              serializeFilters(),
+              sortKey,
+              order,
+              pageSize,
+              page
+            );
+            getProjectCount(serializeFilters());
+          }}
+        >
+          Refresh
+        </RefreshButton>
+      </TopActionBar>
       <Toolbar>
         <ActionButton
           onClick={() => {
@@ -1247,22 +1278,6 @@ const ProjectTable = () => {
       </PaginationContainer>
       <div style={{ margin: '16px 0' }}>
         Total projects with these filters: {projectCount}
-      </div>
-      <div style={{ margin: '16px 0' }}>
-        <ActionButton
-          onClick={() => {
-            getProjectsSimple(
-              serializeFilters(),
-              sortKey,
-              order,
-              pageSize,
-              page
-            );
-            getProjectCount(serializeFilters());
-          }}
-        >
-          Refresh
-        </ActionButton>
       </div>
       <TableWrap>
         <Table>
