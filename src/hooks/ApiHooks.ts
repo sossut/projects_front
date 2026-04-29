@@ -109,8 +109,9 @@ const useProjects = () => {
           }
         }
       );
-      setProjects(response);
+      setProjects(response || []);
     } catch (e) {
+      setProjects([]);
       if (e instanceof Error) {
         setError(e.message);
       } else {
@@ -180,8 +181,8 @@ const useProjects = () => {
         /filename\*?=(?:UTF-8''|\")?([^\";]+)/i
       );
       const fileName = fileNameMatch?.[1]
-        // eslint-disable-next-line no-useless-escape
-        ? decodeURIComponent(fileNameMatch[1].replace(/\"/g, '').trim())
+        ? // eslint-disable-next-line no-useless-escape
+          decodeURIComponent(fileNameMatch[1].replace(/\"/g, '').trim())
         : 'projects-export.xlsx';
 
       const objectUrl = window.URL.createObjectURL(blob);
