@@ -1,6 +1,39 @@
 import React from 'react';
 import type { MetroArea } from '../interfaces/MetroArea';
 import { useEnrichment } from '../hooks/ApiHooks';
+import styled from 'styled-components';
+
+const StyledButton = styled.button`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+`;
+
+const SuccessButton = styled(StyledButton)`
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+  }
+`;
+
+const SecondaryButton = styled(StyledButton)`
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+`;
 
 interface StartMetroAreaUpdateModalProps {
   metroArea: MetroArea;
@@ -122,17 +155,17 @@ const StartMetroAreaUpdateModal: React.FC<StartMetroAreaUpdateModalProps> = ({
             Industrial buildings
           </label>
         </div>
-        <button
+        <SuccessButton
           onClick={() => {
             // Implement start update logic here
             startUpdate();
           }}
         >
           Yes, Start Update
-        </button>
-        <button onClick={onClose} style={{ marginLeft: 8 }}>
+        </SuccessButton>
+        <SecondaryButton onClick={onClose} style={{ marginLeft: 8 }}>
           Cancel
-        </button>
+        </SecondaryButton>
       </div>
     </div>
   );

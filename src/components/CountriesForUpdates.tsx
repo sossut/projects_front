@@ -1,6 +1,44 @@
 import React from 'react';
+import styled from 'styled-components';
 import { useCountries } from '../hooks/ApiHooks';
 import CountryJsonCopyModal from './CountryJsonCopyModal';
+
+const StyledButton = styled.button`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+`;
+
+const PrimaryButton = styled(StyledButton)`
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const SecondaryButton = styled(StyledButton)`
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+`;
 
 type CountryModalType = 'startUpdate' | 'getJson' | false;
 
@@ -49,7 +87,7 @@ const CountriesForUpdates: React.FC = () => {
                 {country.name}
               </td>
               <td style={{ border: '1px solid #ccc', padding: '4px 8px' }}>
-                <button
+                <PrimaryButton
                   disabled
                   onClick={() => {
                     setSelectedCountryName(country.name);
@@ -57,17 +95,17 @@ const CountriesForUpdates: React.FC = () => {
                   }}
                 >
                   Start Update
-                </button>
+                </PrimaryButton>
               </td>
               <td style={{ border: '1px solid #ccc', padding: '4px 8px' }}>
-                <button
+                <PrimaryButton
                   onClick={() => {
                     setSelectedCountryName(country.name);
                     setOpenModal('getJson');
                   }}
                 >
                   Get JSON
-                </button>
+                </PrimaryButton>
               </td>
             </tr>
           ))}
@@ -102,7 +140,7 @@ const CountriesForUpdates: React.FC = () => {
           >
             <h3>Start Update</h3>
             <p>Start update flow for {selectedCountryName} is coming soon.</p>
-            <button onClick={closeModal}>Close</button>
+            <SecondaryButton onClick={closeModal}>Close</SecondaryButton>
           </div>
         </div>
       )}

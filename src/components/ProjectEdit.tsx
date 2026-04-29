@@ -12,6 +12,51 @@ import type { MetroArea } from '../interfaces/MetroArea';
 import type { ProjectWebsite } from '../interfaces/ProjectWebsite';
 import { AppContext } from '../contexts/AppContext';
 
+const StyledButton = styled.button`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+  margin-top: 20px;
+`;
+
+const PrimaryButton = styled(StyledButton)`
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+  }
+`;
+
+const SecondaryButton = styled(StyledButton)`
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+  }
+`;
+
+const DangerButton = styled(StyledButton)`
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.28);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.38);
+  }
+`;
+
 const EditContainer = styled.div`
   padding: 20px;
 `;
@@ -69,9 +114,15 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
   onProjectUpdate
 }) => {
   const { user } = React.useContext(AppContext);
-  const resolvedUser =
-    (user as unknown as { user?: { id?: number; role?: string } })?.user ??
-    user;
+  let userRole: string | undefined;
+  if (typeof user === 'object' && user !== null) {
+    if ('role' in user) {
+      userRole = (user as { role?: string }).role;
+    } else if ('user' in user) {
+      userRole = (user as { user?: { role?: string } }).user?.role;
+    }
+  }
+  const isAdmin = userRole === 'admin';
 
   const { buildingUses, getBuildingUses } = useBuildingUses();
   const { updateProject, getProjectSimpleById, deleteProject } = useProjects();
@@ -797,18 +848,17 @@ const ProjectEdit: React.FC<ProjectEditProps> = ({
           </button>
         </FormGroup>
 
-        <button type="submit">Save</button>
-        <button type="button" onClick={onClose}>
+        <PrimaryButton type="submit">Save</PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose}>
           Cancel
-        </button>
-        {resolvedUser?.role === 'admin' && (
-          <button
+        </SecondaryButton>
+        {isAdmin && (
+          <DangerButton
             onClick={() => setIsDeleteConfirmOpen(true)}
             type="button"
-            style={{ color: 'red' }}
           >
             Delete Project
-          </button>
+          </DangerButton>
         )}
       </form>
       {isConctactModalOpen && editingOperator && (

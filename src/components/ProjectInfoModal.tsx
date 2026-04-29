@@ -51,6 +51,86 @@ const ModalContent = styled.div`
   max-height: 80vh;
 `;
 
+const StyledButton = styled.button`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+`;
+
+const PrimaryButton = styled(StyledButton)`
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const SuccessButton = styled(StyledButton)`
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const SecondaryButton = styled(StyledButton)`
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const CloseButton = styled.button`
+  padding: 0;
+  margin-right: 10px;
+  background: transparent;
+  color: #fff;
+  border: none;
+  font-size: 40px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.7;
+  }
+`;
+
 const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
   selectedProject,
   onClose,
@@ -227,39 +307,15 @@ info@rostek.fi
               </h2>
               <p>last updated: {selectedProject?.updatedAt?.toString()}</p>
             </div>
-            <button
-              style={{
-                padding: 4,
-
-                background: 'black',
-                color: '#fff'
-              }}
-              onClick={handleCopyEmail}
-            >
+            <PrimaryButton onClick={handleCopyEmail}>
               {copied ? 'Email Copied!' : 'Copy Email'}
-            </button>
-            <button
-              style={{
-                padding: 4,
-
-                background: 'black',
-                color: '#fff'
-              }}
-              onClick={handleOpenEnrichmentModal}
-            >
+            </PrimaryButton>
+            <SuccessButton onClick={handleOpenEnrichmentModal}>
               Start enrichment
-            </button>
-            <button
-              onClick={() => setShowOptions((prev) => !prev)}
-              style={{
-                padding: 4,
-
-                background: 'black',
-                color: '#fff'
-              }}
-            >
+            </SuccessButton>
+            <SecondaryButton onClick={() => setShowOptions((prev) => !prev)}>
               Options
-            </button>
+            </SecondaryButton>
             {showOptions && (
               <ProjectModalOptionsMenu
                 onEdit={() => setView('edit')}
@@ -268,23 +324,7 @@ info@rostek.fi
                 onClose={() => setShowOptions(false)}
               />
             )}
-            <button
-              onClick={onClose}
-              style={{
-                padding: 0,
-                marginRight: 10,
-                background: 'transparent',
-                color: '#fff',
-                border: 'none',
-                fontSize: 40,
-                cursor: 'pointer',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 2 // ensure it's above modal content
-              }}
-              aria-label="Close"
-            >
+            <CloseButton onClick={onClose} aria-label="Close">
               <span
                 style={{
                   transform: 'translate(0, -3px)'
@@ -292,7 +332,7 @@ info@rostek.fi
               >
                 &times;
               </span>
-            </button>
+            </CloseButton>
           </div>
           {view === 'details' && (
             <ProjectDetails
