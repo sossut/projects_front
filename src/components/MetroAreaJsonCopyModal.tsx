@@ -1,5 +1,25 @@
 import React from 'react';
+import styled from 'styled-components';
 import { useProjects } from '../hooks/ApiHooks';
+
+const PrimaryButton = styled.button`
+  margin-top: 12px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+  }
+`;
 interface MetroAreaJsonCopyModalProps {
   metroAreaName: string;
   metroAreaId: number;
@@ -12,9 +32,6 @@ const MetroAreaJsonCopyModal: React.FC<MetroAreaJsonCopyModalProps> = ({
   onClose
 }) => {
   const [buildingType, setBuildingType] = React.useState('');
-  const [buildingTypeId, setBuildingTypeId] = React.useState<number | null>(
-    null
-  );
 
   const { projectNames, getProjectNamesByMetroAreaAndBuildingType } =
     useProjects();
@@ -245,7 +262,6 @@ const MetroAreaJsonCopyModal: React.FC<MetroAreaJsonCopyModalProps> = ({
                 : null;
 
               setBuildingType(selectedBuildingType);
-              setBuildingTypeId(parsedTypeId);
               console.log('change');
               if (parsedTypeId) {
                 handleNames(parsedTypeId);
@@ -268,7 +284,9 @@ const MetroAreaJsonCopyModal: React.FC<MetroAreaJsonCopyModalProps> = ({
           </select>
         </label>
 
-        <button onClick={copyToClipboard}>Copy JSON Template</button>
+        <PrimaryButton onClick={copyToClipboard}>
+          Copy JSON Template
+        </PrimaryButton>
       </div>
     </div>
   );

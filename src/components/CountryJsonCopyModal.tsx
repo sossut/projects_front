@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 import { useProjects } from '../hooks/ApiHooks';
 
 type CountryJsonCopyModalProps = {
@@ -6,6 +7,39 @@ type CountryJsonCopyModalProps = {
   countryName: string;
   onClose: () => void;
 };
+
+const StyledButton = styled.button`
+  margin-top: 10px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+`;
+
+const PrimaryButton = styled(StyledButton)`
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+  }
+`;
+
+const SuccessButton = styled(StyledButton)`
+  margin-left: 10px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+  }
+`;
 
 const CountryJsonCopyModal: React.FC<CountryJsonCopyModalProps> = ({
   countryId,
@@ -16,6 +50,7 @@ const CountryJsonCopyModal: React.FC<CountryJsonCopyModalProps> = ({
 
   React.useEffect(() => {
     getProjectNamesByCountry(countryId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const copyToClipboard = () => {
@@ -220,15 +255,10 @@ const CountryJsonCopyModal: React.FC<CountryJsonCopyModalProps> = ({
         <h2>JSON Copy for {countryName}</h2>
         <p>Copy the JSON and paste into ChatGPT</p>
 
-        <button onClick={copyToClipboard} style={{ marginTop: '10px' }}>
+        <PrimaryButton onClick={copyToClipboard}>
           Copy to Clipboard
-        </button>
-        <button
-          onClick={onClose}
-          style={{ marginTop: '10px', marginLeft: '10px' }}
-        >
-          Close
-        </button>
+        </PrimaryButton>
+        <SuccessButton onClick={onClose}>Close</SuccessButton>
       </div>
     </div>
   );

@@ -1,5 +1,25 @@
 import React from 'react';
+import styled from 'styled-components';
 import { useProjects } from '../hooks/ApiHooks';
+
+const PrimaryButton = styled.button`
+  margin-top: 10px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+  }
+`;
 
 const PasteJson: React.FC = () => {
   const { updateProjectNoId, addProjects } = useProjects();
@@ -46,9 +66,9 @@ const PasteJson: React.FC = () => {
             alignItems: 'flex-start'
           }}
         >
-          <button onClick={handleParse} style={{ marginTop: '10px' }}>
+          <PrimaryButton onClick={handleParse}>
             Post Projects / Update Project
-          </button>
+          </PrimaryButton>
           {message && <p style={{ color: 'green' }}>{message}</p>}
           {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>

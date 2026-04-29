@@ -16,6 +16,74 @@ const Table = styled.table`
   }
 `;
 
+const CenteredCell = styled.td`
+  text-align: center;
+  vertical-align: middle;
+  padding: 6px 0;
+`;
+
+const StyledButton = styled.button`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const PrimaryButton = styled(StyledButton)`
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+  }
+`;
+
+const SuccessButton = styled(StyledButton)`
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+  }
+`;
+
+const RowActionButton = styled(StyledButton)`
+  width: 110px;
+  white-space: nowrap;
+`;
+
+const RowPrimaryButton = styled(RowActionButton)`
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+  }
+`;
+
+const RowSuccessButton = styled(RowActionButton)`
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+  }
+`;
+
 const MetroAreasForAutoUpdates: React.FC = () => {
   const {
     getMetroAreas,
@@ -94,7 +162,7 @@ const MetroAreasForAutoUpdates: React.FC = () => {
   };
   return (
     <div style={{ flex: 1, minWidth: 0 }}>
-      <div style={{ height: '120px' }}>
+      <div style={{ height: '120px', marginBottom: '20px' }}>
         <h2>Metro Areas for Auto Updates</h2>
         <input
           type="text"
@@ -104,7 +172,7 @@ const MetroAreasForAutoUpdates: React.FC = () => {
           style={{ marginBottom: '8px', width: '100%', maxWidth: '320px' }}
         />
         <br />
-        <label>Add new metro area</label>
+        <label style={{ marginRight: '5px' }}>Add new metro area</label>
         <select
           value={newMetroArea.countryId ?? ''}
           onChange={(e) => {
@@ -126,6 +194,7 @@ const MetroAreasForAutoUpdates: React.FC = () => {
         </select>
         <input
           type="text"
+          style={{ marginRight: '5px', marginLeft: '5px' }}
           placeholder="Metro area name"
           value={newMetroArea.name}
           onChange={(e) =>
@@ -135,17 +204,14 @@ const MetroAreasForAutoUpdates: React.FC = () => {
             }))
           }
         />
-        <button
+        <SuccessButton
           onClick={() => {
-            // Add logic to add new metro area here
-            // Example: call an API or update state
-            // Reset the form after adding
             handleAddMetroArea();
           }}
           disabled={!newMetroArea.countryId || !newMetroArea.name}
         >
           Add
-        </button>
+        </SuccessButton>
       </div>
       <Table>
         <thead>
@@ -170,36 +236,36 @@ const MetroAreasForAutoUpdates: React.FC = () => {
                   ? new Date(area.lastSearchedAt).toLocaleString()
                   : 'Never'}
               </td>
-              <td>
-                <button
+              <CenteredCell>
+                <RowPrimaryButton
                   onClick={() => {
                     setSelectedArea(area);
                     setIsModalOpen('edit');
                   }}
                 >
                   Edit
-                </button>
-              </td>
-              <td>
-                <button
+                </RowPrimaryButton>
+              </CenteredCell>
+              <CenteredCell>
+                <RowSuccessButton
                   onClick={() => {
                     setSelectedArea(area);
                     setIsModalOpen('startUpdate');
                   }}
                 >
                   Start Update
-                </button>
-              </td>
-              <td>
-                <button
+                </RowSuccessButton>
+              </CenteredCell>
+              <CenteredCell>
+                <RowPrimaryButton
                   onClick={() => {
                     setSelectedArea(area);
                     setIsModalOpen('copyJson');
                   }}
                 >
                   Get JSON
-                </button>
-              </td>
+                </RowPrimaryButton>
+              </CenteredCell>
             </tr>
           ))}
         </tbody>
