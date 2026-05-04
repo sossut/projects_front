@@ -39,15 +39,15 @@ const StyledButton = styled.button`
   }
 `;
 
-const PrimaryButton = styled(StyledButton)`
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+// const PrimaryButton = styled(StyledButton)`
+//   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+//   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
 
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
-  }
-`;
+//   &:hover:not(:disabled) {
+//     transform: translateY(-2px);
+//     box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+//   }
+// `;
 
 const SuccessButton = styled(StyledButton)`
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);

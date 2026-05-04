@@ -29,9 +29,15 @@ import unfavoritedIcon from '../assets/star.png';
 const Table = styled.table`
   width: 100%;
   max-width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   table-layout: auto;
   font-size: 0.85rem;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
 
   @media (max-width: 1440px) {
     font-size: 0.78rem;
@@ -43,40 +49,55 @@ const Table = styled.table`
 `;
 
 const THead = styled.thead`
-  background-color: #515050;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #334155 100%);
   color: white;
 `;
 
 const TH = styled.th`
-  padding: 4px 6px;
-  border: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 0.7rem 0.6rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   text-align: left;
   overflow-wrap: anywhere;
   word-break: break-word;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 800;
+  backdrop-filter: blur(8px);
 
   @media (max-width: 1440px) {
-    padding: 3px 5px;
+    padding: 0.6rem 0.5rem;
   }
 
   @media (max-width: 1280px) {
-    padding: 2px 4px;
+    padding: 0.5rem 0.45rem;
   }
 `;
 
 const TD = styled.td`
-  padding: 4px 6px;
-  border: 1px solid #ddd;
+  padding: 0.6rem 0.6rem;
+  border-right: 1px solid rgba(15, 23, 42, 0.08);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
   text-align: left;
   vertical-align: top;
   overflow-wrap: anywhere;
   word-break: break-word;
+  background: rgba(255, 255, 255, 0.92);
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 
   @media (max-width: 1440px) {
-    padding: 3px 5px;
+    padding: 0.5rem 0.5rem;
   }
 
   @media (max-width: 1280px) {
-    padding: 2px 4px;
+    padding: 0.45rem 0.4rem;
   }
 `;
 
@@ -279,11 +300,22 @@ const FilterActions = styled.div`
 const TableWrap = styled.div`
   width: 100%;
   max-width: 100%;
+  overflow-x: auto;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  scrollbar-gutter: stable;
 `;
 
-const MediaCell = styled(TD)`
+const MediaCell = styled(TD)<{ $hasMedia?: boolean }>`
   white-space: normal;
   max-width: 292px;
+  border-right-width: ${({ $hasMedia }) => ($hasMedia ? '1px' : '0')};
+  border-right-style: ${({ $hasMedia }) => ($hasMedia ? 'solid' : 'none')};
+  border-right-color: ${({ $hasMedia }) =>
+    $hasMedia ? 'rgba(15, 23, 42, 0.08)' : 'transparent'};
+  background: ${({ $hasMedia }) =>
+    $hasMedia ? 'rgba(255, 255, 255, 0.92)' : 'transparent'};
 `;
 
 const MediaList = styled.div`
@@ -299,6 +331,19 @@ const MediaThumb = styled.img`
   max-width: 154px;
   object-fit: cover;
   cursor: pointer;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.12);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 22px rgba(15, 23, 42, 0.18);
+    border-color: rgba(37, 99, 235, 0.35);
+  }
 
   @media (max-width: 1440px) {
     height: 70px;
@@ -315,6 +360,7 @@ const StatusIcon = styled.img`
   height: 24px;
   width: 24px;
   object-fit: contain;
+  filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.16));
 
   @media (max-width: 1440px) {
     height: 20px;
@@ -423,6 +469,10 @@ const CompactTextCell = styled(TD)`
   white-space: normal;
 `;
 
+const StatusTextCell = styled(CompactTextCell)`
+  white-space: nowrap;
+`;
+
 const TopActionButton = styled(ActionButton)`
   padding: 10px 14px;
   font-size: 0.9rem;
@@ -482,6 +532,30 @@ const UsesList = styled.div`
   align-items: flex-start;
   justify-content: flex-start;
   width: 100%;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    padding: 0.24rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.08);
+    color: #1e293b;
+    border: 1px solid rgba(37, 99, 235, 0.14);
+    font-size: 0.78em;
+    line-height: 1.2;
+  }
+`;
+
+const BodyRow = styled.tr`
+  &:nth-child(even) td {
+    background: rgba(248, 250, 252, 0.95);
+  }
+
+  &:hover td {
+    background: rgba(239, 246, 255, 0.98);
+    box-shadow: inset 0 1px 0 rgba(59, 130, 246, 0.08);
+  }
 `;
 
 const ProjectTable = () => {
@@ -901,7 +975,7 @@ const ProjectTable = () => {
     }
   };
   return (
-    <div style={{ maxWidth: '100%', overflowX: 'hidden' }}>
+    <div style={{ maxWidth: '100%' }}>
       <TopActionBar>
         <ExportButton
           onClick={async () => {
@@ -1275,7 +1349,7 @@ const ProjectTable = () => {
               <TH style={{ width: 138 }}>Name</TH>
               <TH style={{ width: 78 }}>City</TH>
               <TH style={{ width: 78 }}>Country</TH>
-              <TH style={{ width: 82 }}>Status</TH>
+              <TH style={{ width: 112 }}>Status</TH>
               <TH style={{ width: 72 }}>Type</TH>
               <TH style={{ width: 96 }}>Uses</TH>
               <TH style={{ width: 42 }}>m</TH>
@@ -1287,7 +1361,7 @@ const ProjectTable = () => {
           </THead>
           <tbody>
             {projects.map((project) => (
-              <tr key={project.id}>
+              <BodyRow key={project.id}>
                 {project.checkedBy ? (
                   <CenterCell>
                     <StatusIcon src={checkedIcon} alt="Checked" />
@@ -1340,9 +1414,9 @@ const ProjectTable = () => {
                 <CompactTextCell title={project.country as string}>
                   {project.country as string}
                 </CompactTextCell>
-                <CompactTextCell title={project.status ?? ''}>
+                <StatusTextCell title={project.status ?? ''}>
                   {project.status}
-                </CompactTextCell>
+                </StatusTextCell>
                 <CompactTextCell title={project.buildingType ?? ''}>
                   {project.buildingType}
                 </CompactTextCell>
@@ -1365,23 +1439,25 @@ const ProjectTable = () => {
                   {project.expectedDateText}
                 </CompactTextCell>
 
-                <MediaCell>
-                  <MediaList>
-                    {project.media?.map((media) => (
-                      <MediaThumb
-                        key={media.id}
-                        src={media.url}
-                        alt="Project"
-                        onClick={() => {
-                          setSelectedImage(media.url);
-                          setSelectedImageDate(
-                            (media.mediaDate as string | undefined) || null
-                          );
-                          setIsModalOpen('image');
-                        }}
-                      />
-                    ))}
-                  </MediaList>
+                <MediaCell $hasMedia={Boolean(project.media?.length)}>
+                  {project.media?.length ? (
+                    <MediaList>
+                      {project.media.map((media) => (
+                        <MediaThumb
+                          key={media.id}
+                          src={media.url}
+                          alt=""
+                          onClick={() => {
+                            setSelectedImage(media.url);
+                            setSelectedImageDate(
+                              (media.mediaDate as string | undefined) || null
+                            );
+                            setIsModalOpen('image');
+                          }}
+                        />
+                      ))}
+                    </MediaList>
+                  ) : null}
                 </MediaCell>
                 <ActionCell>
                   <ActionButtonsContainer>
@@ -1410,7 +1486,7 @@ const ProjectTable = () => {
                     </EnrichButton>
                   </ActionButtonsContainer>
                 </ActionCell>
-              </tr>
+              </BodyRow>
             ))}
           </tbody>
         </Table>
