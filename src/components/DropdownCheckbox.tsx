@@ -104,7 +104,7 @@ const DropdownCheckbox: React.FC<DropdownCheckboxProps> = ({
             position: 'absolute',
             background: '#fff',
             border: '1px solid #ccc',
-            zIndex: 10,
+            zIndex: 9999,
             minWidth: 160,
             padding: 8,
             boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
