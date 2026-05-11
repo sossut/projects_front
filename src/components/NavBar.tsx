@@ -75,6 +75,9 @@ const NavBar: React.FC = () => {
           <NavLink to="/else" className="navbar-link">
             Else
           </NavLink>
+          <NavLink to="/help" className="navbar-link">
+            Help
+          </NavLink>
           <NavLink to="/map" className="navbar-link">
             Map
           </NavLink>

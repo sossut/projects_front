@@ -14,6 +14,7 @@ import Updates from './views/Updates';
 import Else from './views/Else';
 import Login from './views/Login';
 import Map from './views/Map';
+import Help from './views/Help';
 
 const RequireAuth = ({ children }: { children: ReactElement }) => {
   const { user } = useContext(AppContext);
@@ -72,6 +73,14 @@ function App() {
             element={
               <RequireAuth>
                 <Map />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/help"
+            element={
+              <RequireAuth>
+                <Help />
               </RequireAuth>
             }
           />

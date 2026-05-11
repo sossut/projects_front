@@ -35,26 +35,6 @@ const getBuildingTypeColor = (buildingType?: string | null) => {
   return buildingTypeColors[normalized] ?? '#64748b';
 };
 
-const createBuildingTypeIcon = (buildingType?: string | null) => {
-  const color = getBuildingTypeColor(buildingType);
-
-  return L.divIcon({
-    className: 'building-type-marker',
-    html: `<div style="
-      width: 16px;
-      height: 16px;
-      border-radius: 999px;
-      background: ${color};
-      border: 2px solid #ffffff;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.35);
-      box-sizing: border-box;
-    "></div>`,
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-    popupAnchor: [0, -8]
-  });
-};
-
 const getMarkerSizeForZoom = (zoom: number) => {
   if (zoom <= 2) return 8;
   if (zoom <= 4) return 10;
