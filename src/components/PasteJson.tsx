@@ -28,6 +28,10 @@ const PasteJson: React.FC = () => {
   const [message, setMessage] = React.useState<string | null>(null);
   const handleParse = async () => {
     try {
+      if (!jsonInput.trim()) {
+        setError('Please paste JSON data first');
+        return;
+      }
       const parsed = JSON.parse(jsonInput);
       if (parsed.id) {
         console.log('Parsed JSON:', parsed);
@@ -35,17 +39,30 @@ const PasteJson: React.FC = () => {
         setMessage(`Project updated: ${response.message}`);
         setError(null);
         setJsonInput('');
-      }
-      if (parsed.projects) {
+      } else if (parsed.projects) {
         console.log('Parsed JSON (posting projects): ', parsed);
         const response = await addProjects(parsed);
         setMessage(`Projects added: ${response.message}`);
         setError(null);
         setJsonInput('');
+      } else {
+        setError(
+          'JSON must contain either "id" (to update a single project) or "projects" array (for bulk import). Did you paste the correct ChatGPT response?'
+        );
       }
     } catch (err) {
       console.log(err);
-      setError('Invalid JSON');
+      if (err instanceof SyntaxError) {
+        const match = err.message.match(/position (\d+)/);
+        const position = match ? match[1] : 'unknown';
+        setError(
+          `JSON syntax error at position ${position}: ${err.message}. Check that all brackets, quotes and commas are correct.`
+        );
+      } else {
+        setError(
+          `Error: ${err instanceof Error ? err.message : 'Unknown error occurred'}`
+        );
+      }
     }
   };
   return (
