@@ -82,7 +82,7 @@ const MetroAreaJsonCopyModal: React.FC<MetroAreaJsonCopyModalProps> = ({
                   - If only height in floors is known, DO NOT convert to meters in JSON (store meters as null, floors as the known value).
                   - If a direct image URL (ending .jpg/.png/.webp) cannot be reliably obtained, set media.url to "" and do NOT place the webpage URL there; instead put the webpage under projectWebsites or sources.
                   - Ensure internal consistency across fields (names, statuses, sources, completion windows, etc.).
-                  - try to find contact information for the operators (architects, consults, developers, constructors)
+                  - try to find contact information for the operators (architects, consults, developers, constructors), if not found, leave empty string. Do NOT fabricate or guess contact details. Only one email or phone number per entity, and only if clearly linked to the project in a credible source.
 
                   OUTPUT FORMAT — ABSOLUTE REQUIREMENTS
                   1) Output MUST be ONLY valid JSON.
