@@ -33,6 +33,7 @@ const Table = styled.table`
   border-spacing: 0;
   table-layout: auto;
   font-size: 0.85rem;
+  color: #0f172a;
   border: 1px solid rgba(15, 23, 42, 0.12);
   border-radius: 16px;
   overflow: hidden;
@@ -84,6 +85,7 @@ const TD = styled.td`
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
   text-align: left;
   vertical-align: top;
+  color: #0f172a;
   overflow-wrap: anywhere;
   word-break: break-word;
   background: rgba(255, 255, 255, 0.92);
