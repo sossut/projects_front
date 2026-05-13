@@ -362,6 +362,7 @@ const StatusIcon = styled.img`
   height: 24px;
   width: 24px;
   object-fit: contain;
+  display: block;
   filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.16));
 
   @media (max-width: 1440px) {
@@ -372,6 +373,31 @@ const StatusIcon = styled.img`
   @media (max-width: 1280px) {
     height: 18px;
     width: 18px;
+  }
+`;
+
+const DarkReadableStatusIcon = styled(StatusIcon)`
+  @media (prefers-color-scheme: dark) {
+    filter: brightness(0) invert(1)
+      drop-shadow(0 1px 1px rgba(255, 255, 255, 0.2));
+  }
+`;
+
+const FavoriteToggleButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  line-height: 0;
+
+  &:hover:not(:disabled) {
+    transform: none;
+    box-shadow: none;
+    border-color: transparent;
   }
 `;
 
@@ -1366,14 +1392,14 @@ const ProjectTable = () => {
               <BodyRow key={project.id}>
                 {project.checkedBy ? (
                   <CenterCell>
-                    <StatusIcon src={checkedIcon} alt="Checked" />
+                    <DarkReadableStatusIcon src={checkedIcon} alt="Checked" />
                   </CenterCell>
                 ) : (
                   <CenterCell></CenterCell>
                 )}
                 {isFavoritedByCurrentUser(project) ? (
                   <CenterCell>
-                    <button
+                    <FavoriteToggleButton
                       onClick={() => {
                         deleteProjectFavorite(project.id as number);
                         updateProjectInList({
@@ -1385,11 +1411,11 @@ const ProjectTable = () => {
                       }}
                     >
                       <StatusIcon src={favoritedIcon} alt="Favorited" />
-                    </button>
+                    </FavoriteToggleButton>
                   </CenterCell>
                 ) : (
                   <CenterCell>
-                    <button
+                    <FavoriteToggleButton
                       onClick={() => {
                         postProjectFavorite(project.id as number);
                         updateProjectInList({
@@ -1401,8 +1427,11 @@ const ProjectTable = () => {
                         });
                       }}
                     >
-                      <StatusIcon src={unfavoritedIcon} alt="Not Favorited" />
-                    </button>
+                      <DarkReadableStatusIcon
+                        src={unfavoritedIcon}
+                        alt="Not Favorited"
+                      />
+                    </FavoriteToggleButton>
                   </CenterCell>
                 )}
 
