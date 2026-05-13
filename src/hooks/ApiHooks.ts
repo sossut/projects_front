@@ -586,8 +586,10 @@ const useProjects = () => {
     } catch (e) {
       if (e instanceof Error) {
         setError(e.message);
+        throw e;
       } else {
         setError('An unknown error occurred');
+        throw e;
       }
     } finally {
       setLoading(false);
@@ -612,8 +614,10 @@ const useProjects = () => {
     } catch (e) {
       if (e instanceof Error) {
         setError(e.message);
+        throw e;
       } else {
         setError('An unknown error occurred');
+        throw e;
       }
     } finally {
       setLoading(false);
