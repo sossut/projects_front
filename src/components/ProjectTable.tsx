@@ -68,7 +68,6 @@ const TH = styled.th`
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-weight: 800;
-  backdrop-filter: blur(8px);
 
   @media (max-width: 1440px) {
     padding: 0.6rem 0.5rem;
