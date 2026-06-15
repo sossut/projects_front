@@ -87,6 +87,20 @@ const texts: Record<
         heading: 'Enrichment',
         body: (
           <div>
+            <h4>Finding and adding a new area</h4>
+            <ol>
+              <li>
+                Open <strong>Updates</strong> and switch to{' '}
+                <strong>Show Metro Areas for Auto Updates</strong>.
+              </li>
+              <li>
+                Use the search field to find an existing metro area or country.
+              </li>
+              <li>
+                To add a new metro area, choose the country, enter the metro
+                area name, and click <em>Add</em>.
+              </li>
+            </ol>
             <h4>Area enrichment</h4>
             <ol>
               <li>
@@ -119,6 +133,22 @@ const texts: Record<
               Enrichment can take time; you can continue working while processes
               run in background.
             </p>
+            <h4>Manual enrichment with ChatGPT</h4>
+            <ol>
+              <li>
+                Open the target metro area or country and click{' '}
+                <em>Get Json For ChatGPT</em>.
+              </li>
+              <li>
+                Copy the JSON template and paste it into ChatGPT together with
+                your research request.
+              </li>
+              <li>Ask ChatGPT to return structured, well-formed data only.</li>
+              <li>
+                Paste the result into the JSON input area and verify the content
+                before saving or starting the update.
+              </li>
+            </ol>
           </div>
         )
       },
@@ -205,11 +235,26 @@ const texts: Record<
         heading: 'Rikastus',
         body: (
           <div>
+            <h4>Uuden alueen etsiminen ja lisääminen</h4>
+            <ol>
+              <li>
+                Avaa <strong>Updates</strong> ja vaihda näkymään{' '}
+                <strong>Show Metro Areas for Auto Updates</strong>.
+              </li>
+              <li>
+                Käytä hakukenttää olemassa olevan metroalueen tai maan
+                löytämiseen.
+              </li>
+              <li>
+                Jos aluetta ei ole vielä listalla, valitse maa, kirjoita
+                metroalueen nimi ja paina <em>Add</em>.
+              </li>
+            </ol>
             <h4>Alueellinen rikastus</h4>
             <ol>
               <li>
                 Mene <strong>Updates</strong>-näkymään ja valitse metroalue- tai
-                maatila.
+                maa-näkymä.
               </li>
               <li>Valitse alueet, joille haluat käynnistää rikastuksen.</li>
               <li>
@@ -232,6 +277,24 @@ const texts: Record<
               Rikastus saattaa kestää; voit jatkaa työskentelyä samalla kun
               tehtävät suoritetaan.
             </p>
+            <h4>Käsin tehtävä rikastus ChatGPT:llä</h4>
+            <ol>
+              <li>
+                Avaa kohdemaa tai -alue ja paina <em>Get Json For ChatGPT</em>.
+              </li>
+              <li>
+                Kopioi JSON-pohja ja liitä se ChatGPT:hen tutkimuspyynnön
+                kanssa.
+              </li>
+              <li>
+                Pyydä ChatGPT:tä palauttamaan vain jäsennelty ja hyvin
+                muodostettu data.
+              </li>
+              <li>
+                Liitä vastaus JSON-syöttöön ja tarkista sisältö ennen
+                tallennusta tai päivityksen käynnistämistä.
+              </li>
+            </ol>
           </div>
         )
       },

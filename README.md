@@ -51,6 +51,17 @@ Updates-sivulla voit vaihtaa kahden näkymän välillä:
 
 Sivulla on myös JSON-syöttöön liittyvä alue, jota käytetään päivitys- tai enrich-toimintojen tukena.
 
+Uuden metroalueen etsiminen ja lisääminen:
+
+1. Avaa Show Metro Areas for Auto Updates -näkymä.
+2. Käytä hakukenttää olemassa olevan alueen tai maan löytämiseen.
+3. Jos alue puuttuu, valitse maa, kirjoita metroalueen nimi ja paina Add.
+
+Rikastus onnistuu kahdella tavalla:
+
+1. Automaatio: valitse alueet ja käynnistä Start Update, jolloin tehtävät ajetaan taustalla.
+2. Käsin ChatGPT:llä: avaa kohdealue, valitse Get Json For ChatGPT, kopioi JSON ChatGPT:hen, pyydä strukturoitu vastaus ja liitä se takaisin JSON-syöttöön ennen tallennusta.
+
 ## Map-näkymä
 
 Map-sivulla näkyvät projektit kartalla.
