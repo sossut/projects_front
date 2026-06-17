@@ -5,6 +5,7 @@ import logo from '../assets/r_logo.jpg';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import NavBarProfile from './NavBarProfile';
+import { AppContext } from '../contexts/AppContext';
 
 const Nav = styled.nav`
   background: #000;
@@ -53,6 +54,17 @@ const NavBarLink = styled.div`
 `;
 
 const NavBar: React.FC = () => {
+  const { user } = React.useContext(AppContext);
+  const isAdmin =
+    (user &&
+      typeof user === 'object' &&
+      'role' in user &&
+      user.role === 'admin') ||
+    (user &&
+      typeof user === 'object' &&
+      'user' in user &&
+      (user as { user?: { role?: string } }).user?.role === 'admin');
+
   return (
     <Nav>
       <NavBarCore>
@@ -72,12 +84,17 @@ const NavBar: React.FC = () => {
           <NavLink to="/updates" className="navbar-link">
             Updates
           </NavLink>
-          <NavLink to="/else" className="navbar-link">
-            Else
+          <NavLink to="/queue" className="navbar-link">
+            Queue
           </NavLink>
           <NavLink to="/help" className="navbar-link">
             Help
           </NavLink>
+          {isAdmin ? (
+            <NavLink to="/admin" className="navbar-link">
+              Admin
+            </NavLink>
+          ) : null}
           <NavLink to="/map" className="navbar-link">
             Map
           </NavLink>

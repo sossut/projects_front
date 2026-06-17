@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { AppContext } from '../contexts/AppContext';
 
 const Container = styled.div`
   padding: 24px;
@@ -31,6 +32,7 @@ const texts: Record<
   {
     title: string;
     sections: { heading: string; body: React.ReactNode }[];
+    adminSection: { heading: string; body: React.ReactNode };
   }
 > = {
   en: {
@@ -202,7 +204,26 @@ const texts: Record<
           </ul>
         )
       }
-    ]
+    ],
+    adminSection: {
+      heading: 'Admin',
+      body: (
+        <div>
+          <h4>User creation</h4>
+          <ol>
+            <li>Open the Admin page from the top navigation.</li>
+            <li>Fill in username, email and password.</li>
+            <li>Submit the form to create a new regular user.</li>
+          </ol>
+          <h4>Password changes</h4>
+          <ol>
+            <li>Open the Admin page and find the user in the user list.</li>
+            <li>Use the user's email or ID to select the correct account.</li>
+            <li>Enter the new password and save the change.</li>
+          </ol>
+        </div>
+      )
+    }
   },
   fi: {
     title: 'Käyttöohje',
@@ -344,13 +365,52 @@ const texts: Record<
           </ul>
         )
       }
-    ]
+    ],
+    adminSection: {
+      heading: 'Admin',
+      body: (
+        <div>
+          <h4>Käyttäjän luonti</h4>
+          <ol>
+            <li>Avaa Admin-sivu yläpalkista.</li>
+            <li>Täytä käyttäjänimi, sähköposti ja salasana.</li>
+            <li>Lähetä lomake, jolloin uusi tavallinen käyttäjä luodaan.</li>
+          </ol>
+          <h4>Salasanan vaihto</h4>
+          <ol>
+            <li>Avaa Admin-sivu ja etsi käyttäjä käyttäjälistasta.</li>
+            <li>
+              Käytä käyttäjän sähköpostia tai ID:tä oikean tilin valintaan.
+            </li>
+            <li>Anna uusi salasana ja tallenna muutos.</li>
+          </ol>
+        </div>
+      )
+    }
   }
+};
+
+const isAdminUser = (user: unknown) => {
+  if (!user || typeof user !== 'object') {
+    return false;
+  }
+
+  if ('role' in user && (user as { role?: string }).role === 'admin') {
+    return true;
+  }
+
+  if ('user' in user) {
+    return (user as { user?: { role?: string } }).user?.role === 'admin';
+  }
+
+  return false;
 };
 
 const Help: React.FC = () => {
   const [lang, setLang] = React.useState<'en' | 'fi'>('en');
+  const { user } = React.useContext(AppContext);
   const t = texts[lang];
+  const isAdmin = isAdminUser(user);
 
   return (
     <Container>
@@ -370,6 +430,12 @@ const Help: React.FC = () => {
           <div>{s.body}</div>
         </Section>
       ))}
+      {isAdmin ? (
+        <Section>
+          <h2>{t.adminSection.heading}</h2>
+          <div>{t.adminSection.body}</div>
+        </Section>
+      ) : null}
     </Container>
   );
 };

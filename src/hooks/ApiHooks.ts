@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { Project } from '../interfaces/Project';
 import type { MetroArea } from '../interfaces/MetroArea';
 import type { Country } from '../interfaces/Country';
@@ -1117,6 +1117,105 @@ const useLogin = () => {
   };
 };
 
+type AdminUserPayload = {
+  username: string;
+  email: string;
+  password: string;
+  role: string;
+};
+
+type AdminUserRecord = {
+  id: number;
+  username?: string;
+  email?: string;
+  role?: string;
+};
+
+const useAdminUsers = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [users, setUsers] = useState<AdminUserRecord[]>([]);
+
+  const getUsers = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchJson(`${baseUrl}/users/`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setUsers(Array.isArray(response) ? response : []);
+      return response;
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const createUser = async (payload: AdminUserPayload) => {
+    setLoading(true);
+    setError(null);
+    try {
+      return await fetchJson(`${baseUrl}/users/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const changeUserPassword = async (userId: number, password: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      return await fetchJson(`${baseUrl}/users/${userId}/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ password })
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    loading,
+    error,
+    users,
+    getUsers,
+    createUser,
+    changeUserPassword
+  };
+};
+
 const useQueue = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -1162,5 +1261,6 @@ export {
   useMetroAreas,
   useEnrichment,
   useLogin,
+  useAdminUsers,
   useQueue
 };

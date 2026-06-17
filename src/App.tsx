@@ -15,12 +15,40 @@ import Else from './views/Else';
 import Login from './views/Login';
 import Map from './views/Map';
 import Help from './views/Help';
+import Admin from './views/Admin';
+import Profile from './views/Profile';
+
+const isAdminUser = (user: unknown) => {
+  if (!user || typeof user !== 'object') {
+    return false;
+  }
+
+  if ('role' in user && (user as { role?: string }).role === 'admin') {
+    return true;
+  }
+
+  if ('user' in user) {
+    return (user as { user?: { role?: string } }).user?.role === 'admin';
+  }
+
+  return false;
+};
 
 const RequireAuth = ({ children }: { children: ReactElement }) => {
   const { user } = useContext(AppContext);
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
+const RequireAdmin = ({ children }: { children: ReactElement }) => {
+  const { user } = useContext(AppContext);
+
+  if (!user || !isAdminUser(user)) {
+    return <Navigate to="/" replace />;
   }
 
   return children;
@@ -61,10 +89,18 @@ function App() {
           />
           <Route path="/login" element={<Login />} />
           <Route
-            path="/profile"
+            path="/queue"
             element={
               <RequireAuth>
                 <Else />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <RequireAuth>
+                <Profile />
               </RequireAuth>
             }
           />
@@ -82,6 +118,14 @@ function App() {
               <RequireAuth>
                 <Help />
               </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <RequireAdmin>
+                <Admin />
+              </RequireAdmin>
             }
           />
         </Routes>
