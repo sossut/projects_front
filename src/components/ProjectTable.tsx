@@ -476,22 +476,6 @@ const EnrichButton = styled(InfoButton)<{ isLoading?: boolean }>`
   }
 `;
 
-const Spinner = styled.div`
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-`;
-
 const CompactTextCell = styled(TD)`
   white-space: normal;
 `;
@@ -650,8 +634,7 @@ const ProjectTable = () => {
   );
   const [enrichmentLoading, setEnrichmentLoading] = React.useState(false);
 
-  const { user, enrichingProjectId, setEnrichingProjectId } =
-    React.useContext(AppContext);
+  const { user, setEnrichingProjectId } = React.useContext(AppContext);
   const storedUser = React.useMemo(() => {
     try {
       const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -667,6 +650,10 @@ const ProjectTable = () => {
     user ??
     storedUser?.user ??
     storedUser;
+  const isAdminUser =
+    String(
+      (resolvedUser as { role?: string } | null)?.role || ''
+    ).toLowerCase() === 'admin';
   const userId =
     typeof resolvedUser?.id === 'number'
       ? resolvedUser.id
@@ -1499,15 +1486,25 @@ const ProjectTable = () => {
                       <span>More</span>
                       <span>Info</span>
                     </InfoButton>
-                    <EnrichButton
-                      onClick={() => {
-                        /* intentionally disabled */
-                      }}
-                      disabled={true}
-                      title="Disabled — Do not use"
-                    >
-                      <span>Enrich (disabled — do not use)</span>
-                    </EnrichButton>
+                    {isAdminUser ? (
+                      <EnrichButton
+                        onClick={() => {
+                          handleEnrichClick(project);
+                        }}
+                      >
+                        <span>Enrich</span>
+                      </EnrichButton>
+                    ) : (
+                      <EnrichButton
+                        onClick={() => {
+                          /* intentionally disabled */
+                        }}
+                        disabled={true}
+                        title="Disabled for regular users"
+                      >
+                        <span>Enrich (disabled for regular users)</span>
+                      </EnrichButton>
+                    )}
                   </ActionButtonsContainer>
                 </ActionCell>
               </BodyRow>

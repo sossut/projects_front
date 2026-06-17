@@ -148,7 +148,10 @@ const ProjectInfoModal: React.FC<ProjectInfoModalProps> = ({
   const [showEnrichmentConfirm, setShowEnrichmentConfirm] =
     React.useState(false);
   const [enrichmentLoading, setEnrichmentLoading] = React.useState(false);
-  const { setEnrichingProjectId } = React.useContext(AppContext);
+  const { user, setEnrichingProjectId } = React.useContext(AppContext);
+  const isAdminUser =
+    String((user as { role?: string } | null)?.role || '').toLowerCase() ===
+    'admin';
   const {
     startEnrichmentForProject,
     waitForEnrichmentJobTerminalStatus,
@@ -310,9 +313,15 @@ info@rostek.fi
             <PrimaryButton onClick={handleCopyEmail}>
               {copied ? 'Email Copied!' : 'Copy Email'}
             </PrimaryButton>
-            <SuccessButton disabled title="Disabled — Do not use">
-              Start enrichment (disabled — do not use)
-            </SuccessButton>
+            {isAdminUser ? (
+              <SuccessButton onClick={handleOpenEnrichmentModal}>
+                Start enrichment
+              </SuccessButton>
+            ) : (
+              <SuccessButton disabled title="Disabled for regular users">
+                Start enrichment (disabled for regular users)
+              </SuccessButton>
+            )}
             <SecondaryButton onClick={() => setShowOptions((prev) => !prev)}>
               Options
             </SecondaryButton>
