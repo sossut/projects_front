@@ -1501,18 +1501,12 @@ const ProjectTable = () => {
                     </InfoButton>
                     <EnrichButton
                       onClick={() => {
-                        handleEnrichClick(project);
+                        /* intentionally disabled */
                       }}
-                      disabled={enrichingProjectId === project.id}
+                      disabled={true}
+                      title="Disabled — Do not use"
                     >
-                      {enrichingProjectId === project.id ? (
-                        <>
-                          <Spinner />
-                          <span>Enriching...</span>
-                        </>
-                      ) : (
-                        <span>Enrich</span>
-                      )}
+                      <span>Enrich (disabled — do not use)</span>
                     </EnrichButton>
                   </ActionButtonsContainer>
                 </ActionCell>

@@ -310,8 +310,8 @@ info@rostek.fi
             <PrimaryButton onClick={handleCopyEmail}>
               {copied ? 'Email Copied!' : 'Copy Email'}
             </PrimaryButton>
-            <SuccessButton onClick={handleOpenEnrichmentModal}>
-              Start enrichment
+            <SuccessButton disabled title="Disabled — Do not use">
+              Start enrichment (disabled — do not use)
             </SuccessButton>
             <SecondaryButton onClick={() => setShowOptions((prev) => !prev)}>
               Options
