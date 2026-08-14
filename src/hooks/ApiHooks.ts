@@ -4,7 +4,7 @@ import type { MetroArea } from '../interfaces/MetroArea';
 import type { Country } from '../interfaces/Country';
 
 const baseUrl =
-  'https://origin-known-ceramic-closure.trycloudflare.com/api/v1/';
+  'https://present-traveler-enhancement-receiver.trycloudflare.com/api/v1/';
 const getAuthToken = () => {
   try {
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
