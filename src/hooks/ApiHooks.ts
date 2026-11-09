@@ -4,7 +4,7 @@ import type { MetroArea } from '../interfaces/MetroArea';
 import type { Country } from '../interfaces/Country';
 
 const baseUrl =
-  'https://griffin-quoted-assured-smallest.trycloudflare.com/api/v1/';
+  'https://frequently-better-walk-stuff.trycloudflare.com/api/v1';
 const getAuthToken = () => {
   try {
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
@@ -30,8 +30,6 @@ class ApiError extends Error {
     this.name = 'ApiError';
     this.status = status;
   }
-}
-
 const fetchJson = async (url: string, options = {}) => {
   try {
     const response = await fetch(url, options);
