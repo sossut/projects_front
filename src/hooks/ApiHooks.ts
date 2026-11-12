@@ -3,8 +3,7 @@ import type { Project } from '../interfaces/Project';
 import type { MetroArea } from '../interfaces/MetroArea';
 import type { Country } from '../interfaces/Country';
 
-const baseUrl =
-  'https://copying-elderly-engineer-protected.trycloudflare.com/api/v1';
+const baseUrl = 'https://bull-month-cloth-providers.trycloudflare.com/api/v1';
 const getAuthToken = () => {
   try {
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
